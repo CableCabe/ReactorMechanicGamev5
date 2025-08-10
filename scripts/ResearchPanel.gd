@@ -70,16 +70,21 @@ func _build() -> void:
 func _make_row(key: String, meta: Dictionary) -> void:
 	var h := HBoxContainer.new()
 
+	var cost_lbl := Label.new()
+	var cost_eu := _cost_eu_from(meta)
+	cost_lbl.text = "%d Eu" % int(cost_eu)
+
 	var name_lbl := Label.new()
 	name_lbl.text = meta.get("name", key)
-
-	var cost_lbl := Label.new()
-	var cost_eu := float(meta.get("cost", {}).get("eu", 0))
-	cost_lbl.text = "%d EU" % int(cost_eu)
 
 	var btn := Button.new()
 	btn.text = "Buy"
 	btn.pressed.connect(_on_buy.bind(key))
+
+	btn.mouse_entered.connect(_on_row_hover.bind(key, true))
+	btn.mouse_exited.connect(_on_row_hover.bind(key, false))
+	h.mouse_entered.connect(_on_row_hover.bind(key, true))
+	h.mouse_exited.connect(_on_row_hover.bind(key, false))
 
 	h.add_child(name_lbl)
 	var spacer := Control.new()
@@ -96,17 +101,32 @@ func _make_row(key: String, meta: Dictionary) -> void:
 		"row": h,
 	}
 
+func _on_row_hover(key: String, inside: bool) -> void:
+	var item: Dictionary = _rows.get(key)
+	if item == null: return
+	var meta: Dictionary = item["meta"]
+	var cost_eu := _cost_eu_from(meta)
+	var afford_ok := GameState.eu >= cost_eu
+	var lbl := item["cost_label"] as Label
+
+	if not afford_ok and inside:
+		lbl.modulate = Color(1, 0.6, 0.6)  # soft red on hover when can't afford
+	else:
+		lbl.modulate = Color(1, 1, 1)      # reset when leaving or if affordable
+
+
 # -- internal: enable/disable buttons based on EU --
 func _refresh_affordability(_v: float) -> void:
-	# FIX: iterate current rows instead of `_all_item_rows`
 	for item in _rows.values():
 		var meta: Dictionary = item["meta"]
-		var cost_eu: float = float(meta.get("cost", {}).get("eu", 0))
+		var cost_eu := _cost_eu_from(meta)
 		var afford_ok := GameState.eu >= cost_eu
-		item["buy_button"].disabled = not afford_ok
-		item["buy_button"].tooltip_text = "Need %d EU | Have %d EU" % [int(cost_eu), int(GameState.eu)]
-		# optional visual: dim cost label if unaffordable
-		(item["cost_label"] as Label).modulate = Color(1,1,1) if afford_ok else Color(1,0.6,0.6)
+
+		(item["buy_button"] as Button).disabled = not afford_ok
+		(item["buy_button"] as Button).tooltip_text = "Need %d EU | Have %d EU" % [int(cost_eu), int(GameState.eu)]
+
+		# baseline color; hover will set red when needed
+		(item["cost_label"] as Label).modulate = Color(1, 1, 1)
 
 # -- internal: handle Buy click --
 func _on_buy(key: String) -> void:
@@ -133,3 +153,27 @@ func _on_research_loaded() -> void:
 	# Rebuild once data arrives
 	_build()
 	_refresh_affordability(GameState.eu)
+
+func _cost_eu_from(meta: Dictionary) -> float:
+	var eu := 0.0
+	if meta.has("cost"):
+		var cost = meta["cost"]
+		if typeof(cost) == TYPE_DICTIONARY:
+			if cost.has("eu"):      eu = float(cost["eu"])
+			elif cost.has("EU"):    eu = float(cost["EU"])
+			elif cost.has("Eu"):    eu = float(cost["Eu"])
+			else:
+				# fallback: first numeric-like value in the dict
+				for v in cost.values():
+					var t := typeof(v)
+					if t == TYPE_INT or t == TYPE_FLOAT: eu = float(v); break
+					elif t == TYPE_STRING:                eu = float(v); break
+		else:
+			eu = float(cost)  # supports cost: 50
+	elif meta.has("eu"):       eu = float(meta["eu"])
+	elif meta.has("EU"):       eu = float(meta["EU"])
+	elif meta.has("Eu"):       eu = float(meta["Eu"])
+	elif meta.has("price"):    eu = float(meta["price"])
+	elif meta.has("cost_eu"):  eu = float(meta["cost_eu"])
+	return eu
+
