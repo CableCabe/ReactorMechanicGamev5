@@ -1,0 +1,94 @@
+[gd_scene load_steps=7 format=3 uid="uid://bjhj1ocmdoqkn"]
+
+[ext_resource type="Script" path="res://scripts/Main.gd" id="1_qqp56"]
+[ext_resource type="Script" path="res://scripts/HUD.gd" id="2_y18xa"]
+[ext_resource type="PackedScene" uid="uid://cpqmv4gp7dihg" path="res://scenes/ProductionPanel.tscn" id="3_3prin"]
+[ext_resource type="PackedScene" uid="uid://c74yjt60am62e" path="res://scenes/ReactorView.tscn" id="3_223r2"]
+[ext_resource type="Script" path="res://scripts/MarketPanel.gd" id="3_a3rr2"]
+[ext_resource type="PackedScene" uid="uid://b55ggbh10nbgf" path="res://scenes/ResearchPanel.tscn" id="6_okip1"]
+
+[node name="Main" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_qqp56")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="PanelContainer" type="PanelContainer" parent="VBoxContainer"]
+layout_mode = 2
+
+[node name="TopBar" type="HBoxContainer" parent="VBoxContainer/PanelContainer"]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+theme_override_constants/separation = 12
+script = ExtResource("2_y18xa")
+
+[node name="EuLabel" type="Label" parent="VBoxContainer/PanelContainer/TopBar"]
+layout_mode = 2
+text = "Eu: 0"
+
+[node name="MoneyLabel" type="Label" parent="VBoxContainer/PanelContainer/TopBar"]
+layout_mode = 2
+text = "$$: 0"
+
+[node name="Fuel" type="Label" parent="VBoxContainer/PanelContainer/TopBar"]
+layout_mode = 2
+text = "Fuel: 0"
+
+[node name="Coolant" type="Label" parent="VBoxContainer/PanelContainer/TopBar"]
+layout_mode = 2
+text = "Coolant: 0"
+
+[node name="Body" type="HBoxContainer" parent="VBoxContainer"]
+custom_minimum_size = Vector2(260, 0)
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="ReactorView" parent="VBoxContainer/Body" instance=ExtResource("3_223r2")]
+clip_contents = true
+custom_minimum_size = Vector2(260, 0)
+layout_mode = 2
+
+[node name="Tabs" type="TabContainer" parent="VBoxContainer/Body"]
+clip_contents = true
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Production Panel" parent="VBoxContainer/Body/Tabs" instance=ExtResource("3_3prin")]
+layout_mode = 2
+
+[node name="Market Panel" type="Control" parent="VBoxContainer/Body/Tabs"]
+visible = false
+layout_mode = 2
+script = ExtResource("3_a3rr2")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="VBoxContainer/Body/Tabs/Market Panel"]
+layout_mode = 0
+offset_right = 410.0
+offset_bottom = 87.0
+
+[node name="Label" type="Label" parent="VBoxContainer/Body/Tabs/Market Panel/VBoxContainer"]
+layout_mode = 2
+text = "Sell: 0% auto"
+
+[node name="SellSlider" type="HSlider" parent="VBoxContainer/Body/Tabs/Market Panel/VBoxContainer"]
+layout_mode = 2
+value = 10.0
+
+[node name="Button" type="Button" parent="VBoxContainer/Body/Tabs/Market Panel/VBoxContainer"]
+layout_mode = 2
+text = "Save Game"
+
+[node name="ResearchPanel" parent="VBoxContainer/Body/Tabs" instance=ExtResource("6_okip1")]
+visible = false
+layout_mode = 2

@@ -1,0 +1,102 @@
+{
+"test_buy": {
+  "name": "Test Buy",
+  "tier": 1,
+  "levels": [ { "cost": { "eu": 5 }, "mods": [] } ]
+},
+"efficiency_i": {
+	"name": "Efficiency I",
+	"desc": "Reactor output +10%",
+	"tier": 1,
+	"deps": [],
+	"levels": [
+	  { "cost": { "eu": 50 }, "mods": [ { "scope":"global", "stat":"eu_mult", "op":"mul", "value": 0.10 } ] }
+	]
+  },
+  "timing_i": {
+	"name": "Ignition Timing I",
+	"desc": "Pillars ignite 10% faster",
+	"tier": 1,
+	"deps": [],
+	"levels": [
+	  { "cost": { "eu": 150 }, "mods": [ { "scope":"global", "stat":"fire_rate_mult", "op":"mul", "value": 0.10 } ] }
+	]
+  },
+  "unlock_pillar_2": {
+	"name": "Unlock Pillar 2",
+	"desc": "Enable second pillar",
+	"tier": 1,
+	"deps": ["efficiency_i"],
+	"levels": [
+	  { "cost": { "eu": 200 }, "unlock": { "pillars": [1] } }
+	]
+  },
+  "unlock_pillar_3": {
+	"name": "Unlock Pillar 3",
+	"desc": "Enable third pillar",
+	"tier": 2,
+	"deps": ["unlock_pillar_2"],
+	"levels": [
+	  { "cost": { "eu": 300 }, "unlock": { "pillars": [2] } }
+	]
+  },
+  "unlock_pillar_4": {
+	"name": "Unlock Pillar 4",
+	"desc": "Enable fourth pillar",
+	"tier": 2,
+	"deps": ["unlock_pillar_3"],
+	"levels": [
+	  { "cost": { "eu": 400 }, "unlock": { "pillars": [3] } }
+	]
+  },
+  "unlock_pillar_5": {
+	"name": "Unlock Pillar 5",
+	"desc": "Enable fifth pillar",
+	"tier": 3,
+	"deps": ["unlock_pillar_4"],
+	"levels": [
+	  { "cost": { "eu": 500 }, "unlock": { "pillars": [4] } }
+	]
+  },
+  "unlock_pillar_6": {
+	"name": "Unlock Pillar 6",
+	"desc": "Enable sixth pillar",
+	"tier": 3,
+	"deps": ["unlock_pillar_5"],
+	"levels": [
+	  { "cost": { "eu": 600 }, "unlock": { "pillars": [5] } }
+	]
+  },
+  "coolant_system_i": {
+	"name": "Coolant System I",
+	"desc": "Cooling +10% (less heat)",
+	"tier": 2,
+	"deps": ["efficiency_i"],
+	"levels": [
+	  { "cost": { "eu": 120 }, "mods": [ { "scope":"global", "stat":"heat_mult", "op":"mul", "value": -0.10 } ] }
+	]
+  },
+  "storage_i": {
+	"name": "Storage Upgrade I",
+	"desc": "Fuel & Coolant cap +200",
+	"tier": 2,
+	"deps": ["coolant_system_i"],
+	"levels": [
+	  { "cost": { "eu": 100, "money": 50 }, "on_buy": { "fuel_cap_delta": 200, "coolant_cap_delta": 200 } }
+	]
+  },
+  "fuel_enhancement_i": {
+	"name": "Fuel Enhancement I",
+	"desc": "+5% Eu, +5% heat add",
+	"tier": 3,
+	"deps": ["storage_i"],
+	"levels": [
+	  { "cost": { "eu": 200, "money": 150 },
+		"mods": [
+		  { "scope":"global", "stat":"eu_mult", "op":"mul", "value": 0.05 },
+		  { "scope":"global", "stat":"heat_add", "op":"add", "value": 0.05 }
+		]
+	  }
+	]
+  }
+}

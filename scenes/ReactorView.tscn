@@ -1,0 +1,42 @@
+[gd_scene load_steps=2 format=3 uid="uid://c74yjt60am62e"]
+
+[ext_resource type="Script" path="res://scripts/ReactorView.gd" id="1_i5bm2"]
+
+[node name="ReactorView" type="PanelContainer"]
+script = ExtResource("1_i5bm2")
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+
+[node name="Title" type="Label" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "Reactor"
+
+[node name="Reactor" type="ColorRect" parent="MarginContainer/VBoxContainer"]
+custom_minimum_size = Vector2(240, 140)
+layout_mode = 2
+color = Color(0.207843, 0.207843, 0.329412, 1)
+
+[node name="FuelLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "FUEL"
+
+[node name="FuelBar" type="ProgressBar" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="CoolantLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "COOLANT"
+
+[node name="CoolantBar" type="ProgressBar" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="HeatLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "HEAT"
+
+[node name="HeatBar" type="ProgressBar" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
