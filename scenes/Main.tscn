@@ -35,10 +35,12 @@ script = ExtResource("2_y18xa")
 
 [node name="EuLabel" type="Label" parent="VBoxContainer/PanelContainer/TopBar"]
 layout_mode = 2
+theme_type_variation = &"HeaderLarge"
 text = "Eu: 0"
 
 [node name="MoneyLabel" type="Label" parent="VBoxContainer/PanelContainer/TopBar"]
 layout_mode = 2
+theme_type_variation = &"HeaderLarge"
 text = "$$: 0"
 
 [node name="Fuel" type="Label" parent="VBoxContainer/PanelContainer/TopBar"]

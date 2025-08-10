@@ -6,17 +6,47 @@ extends PanelContainer
 
 var _rows: Dictionary = {}  # key -> {meta, buy_button, cost_label, row}
 
+# Using explicit path so you don't need the Unique Name toggle right now
 @onready var list: VBoxContainer = $MarginContainer/VBoxContainer/ScrollContainer/List
 
+signal research_loaded
+var research_db: Dictionary = {}
+
 func _ready() -> void:
-	# Build only after research data exists; also listen to EU changes
+	# Always build once (shows placeholder if DB empty), then listen for updates
 	GameState.eu_changed.connect(_refresh_affordability)
-	if GameState.research_db.size() > 0:
-		_build()
-		_refresh_affordability(GameState.eu)
+	assert(list != null, "ResearchPanel: List container not found at $MarginContainer/VBoxContainer/ScrollContainer/List")
+	_build()
+	_load_research()
+	_refresh_affordability(GameState.eu)
 	# If GameState emits `research_loaded` after loading JSON, hook it up.
 	if GameState.has_signal("research_loaded"):
 		GameState.connect("research_loaded", Callable(self, "_on_research_loaded"))
+
+func _load_research() -> void:
+	var path = "res://data/research.json"
+	if not FileAccess.file_exists(path):
+		push_error("Missing research.json at " + path)
+		research_loaded.emit()
+		return
+
+	var f = FileAccess.open(path, FileAccess.READ)
+	var raw = f.get_as_text()
+	var parsed = JSON.parse_string(raw)  # untyped on purpose to avoid warnings-as-errors
+
+	if typeof(parsed) == TYPE_DICTIONARY:
+		research_db = parsed
+	elif typeof(parsed) == TYPE_ARRAY:
+		var d = {}
+		for e in parsed:
+			var k = e.get("key", e.get("id", e.get("name", "item_%d" % d.size())))
+			d[k] = e
+		research_db = d
+	else:
+		push_error("Unexpected JSON shape in " + path)
+
+	print("Loaded research entries:", research_db.size())
+	research_loaded.emit()
 
 func _build() -> void:
 	# safety: bail if db not ready
@@ -34,6 +64,7 @@ func _build() -> void:
 	for key in GameState.research_db.keys():
 		var meta: Dictionary = GameState.research_db[key]
 		_make_row(key, meta)
+	print("ResearchPanel built rows:", _rows.size(), "list children:", list.get_child_count())
 
 # -- internal: build one row --
 func _make_row(key: String, meta: Dictionary) -> void:

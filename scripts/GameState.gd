@@ -2,12 +2,18 @@
 extends Node
 
 # --- Core State ---
-var eu: float = 0.0
+var _eu: float = 0.0
+var eu: float:
+	get: return _eu
+	set(value):
+		if !is_equal_approx(value, _eu):
+			_eu = value
+			eu_changed.emit(_eu)
+
 var money: float = 0.0
 var temp: float = 20.0       # °C
 var fuel: float = 50.0
 var coolant: float = 50.0
-
 var flags: Dictionary = {"auto_sell_ratio": 0.01}
 
 var pillars: Array = []   # Array of Dictionary {"id":int, "level":int, "enabled":bool}
@@ -38,27 +44,52 @@ const COOLANT_POWER := 0.6
 const PRICE_PER_10_EU := 1.0
 const FUEL_CAP     := 1000.0
 const COOLANT_CAP  := 1000.0
-
 # Fixed‑timestep accumulator (10 Hz)
 const STEP := 0.1
 var _accum := 0.0
 
+
+
+# ---- SIGNALS ----
+signal research_loaded
 signal state_changed
-
-# ---- SPENDING TRACKER ----
-
 signal eu_changed(value)
 
-func add_eu(amount: float) -> void:
-	eu += amount
-	eu_changed.emit(eu)
 
-func spend_eu(amount: float) -> bool:
-	if eu >= amount:
-		eu -= amount
-		eu_changed.emit(eu)
+
+# ---- SPENDING TRACKER ----
+func add_eu(a: float) -> void:
+	eu = eu + a
+
+func spend_eu(a: float) -> bool:
+	if _eu >= a:
+		eu = _eu - a
 		return true
 	return false
+
+
+# ---- RESEARCH LOADING ----
+func _enter_tree() -> void:
+	_load_research()
+
+func _load_research() -> void:
+	var f = FileAccess.open("res://data/research.json", FileAccess.READ)
+	if f:
+		var parsed = JSON.parse_string(f.get_as_text())
+		if typeof(parsed) == TYPE_DICTIONARY:
+			research_db = parsed
+		elif typeof(parsed) == TYPE_ARRAY:
+			var d = {}
+			for e in parsed:
+				var k = e.get("key", e.get("id", e.get("name", "item_%d" % d.size())))
+				d[k] = e
+			research_db = d
+		print("Loaded research entries:", research_db.size())
+	else:
+		push_error("Missing research.json at res://data/research.json")
+	research_loaded.emit()
+
+
 
 
 # ---- Mod system ----
