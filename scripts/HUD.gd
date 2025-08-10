@@ -6,8 +6,11 @@ extends HBoxContainer
 @onready var coolant_label: Label = $Coolant
 
 func _ready() -> void:
-	GameState.state_changed.connect(_refresh)
-	_refresh()
+	GameState.eu_changed.connect(_on_eu_changed)
+	_on_eu_changed(GameState.eu)  # initialize the label
+	
+func _on_eu_changed(v: float) -> void:
+	%EuLabel.text = str(round(v))
 
 func _refresh() -> void:
 	eu_label.text = "Eu: %.1f" % GameState.eu

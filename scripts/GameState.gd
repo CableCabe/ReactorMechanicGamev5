@@ -45,6 +45,22 @@ var _accum := 0.0
 
 signal state_changed
 
+# ---- SPENDING TRACKER ----
+
+signal eu_changed(value)
+
+func add_eu(amount: float) -> void:
+	eu += amount
+	eu_changed.emit(eu)
+
+func spend_eu(amount: float) -> bool:
+	if eu >= amount:
+		eu -= amount
+		eu_changed.emit(eu)
+		return true
+	return false
+
+
 # ---- Mod system ----
 func base_stats() -> Dictionary:
 	return {
