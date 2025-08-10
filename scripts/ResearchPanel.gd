@@ -71,7 +71,7 @@ func _make_row(key: String, meta: Dictionary) -> void:
 	var h := HBoxContainer.new()
 
 	var cost_lbl := Label.new()
-	var cost_eu := _cost_eu_from(meta)
+	var cost_eu := _cost_eu_for_next_level(key, meta)
 	cost_lbl.text = "%d Eu" % int(cost_eu)
 
 	var name_lbl := Label.new()
@@ -99,6 +99,7 @@ func _make_row(key: String, meta: Dictionary) -> void:
 		"buy_button": btn,
 		"cost_label": cost_lbl,
 		"row": h,
+		"level": _get_next_level_index(key),
 	}
 
 func _on_row_hover(key: String, inside: bool) -> void:
@@ -117,27 +118,37 @@ func _on_row_hover(key: String, inside: bool) -> void:
 
 # -- internal: enable/disable buttons based on EU --
 func _refresh_affordability(_v: float) -> void:
-	for item in _rows.values():
-		var meta: Dictionary = item["meta"]
-		var cost_eu := _cost_eu_from(meta)
+	for item_key in _rows.keys():
+		var row: Dictionary = _rows[item_key]
+		var meta: Dictionary = row["meta"]
+		var cost_eu := _cost_eu_for_next_level(item_key, meta)
 		var afford_ok := GameState.eu >= cost_eu
 
-		(item["buy_button"] as Button).disabled = not afford_ok
-		(item["buy_button"] as Button).tooltip_text = "Need %d EU | Have %d EU" % [int(cost_eu), int(GameState.eu)]
-
-		# baseline color; hover will set red when needed
-		(item["cost_label"] as Label).modulate = Color(1, 1, 1)
+		(row["buy_button"] as Button).disabled = not afford_ok
+		(row["buy_button"] as Button).tooltip_text = "Need %d Eu | Have %d Eu" % [int(cost_eu), int(GameState.eu)]
+		(row["cost_label"] as Label).modulate = Color(1,1,1)
 
 # -- internal: handle Buy click --
 func _on_buy(key: String) -> void:
-	var item: Dictionary = _rows.get(key)
-	if item == null:
-		return
-	var cost_eu: float = float(item["meta"].get("cost", {}).get("eu", 0))
+	var row: Dictionary = _rows.get(key)
+	if row == null: return
+
+	var meta: Dictionary = row["meta"]
+	var cost_eu := _cost_eu_for_next_level(key, meta)
+
 	if GameState.spend_eu(cost_eu):
-		_apply_item(key)  # see below
+		# advance level
+		var new_lvl := _get_next_level_index(key) + 1
+		_set_level_index(key, new_lvl)
+
+		# update label to show next level's price (or 0 if maxed)
+		var next_cost := _cost_eu_for_next_level(key, meta)
+		(row["cost_label"] as Label).text = "%d Eu" % int(next_cost)
+
+		_apply_item(key)  # your real effect hook
+		_refresh_affordability(GameState.eu)
 	else:
-		# TODO: flash not-enough animation
+		# optional: flash not-enough
 		pass
 
 # -- internal: apply the effect of a research --
@@ -154,26 +165,85 @@ func _on_research_loaded() -> void:
 	_build()
 	_refresh_affordability(GameState.eu)
 
+# --- helpers: robust cost parsing ---
+func _parse_number_any(s: String) -> float:
+	var re := RegEx.new()
+	re.compile("-?\\d+(?:\\.\\d+)?")
+	var m := re.search(s)
+	if m and m.get_string() != null:
+		return float(m.get_string())
+	return 0.0
+
+func _extract_eu_any(v) -> float:
+	var t := typeof(v)
+	if t == TYPE_INT or t == TYPE_FLOAT:
+		return float(v)
+	if t == TYPE_STRING:
+		return _parse_number_any(v)
+	if t == TYPE_DICTIONARY:
+		# prefer likely keys first
+		for k in v.keys():
+			var key := String(k).to_lower()
+			if key in ["eu","cost_eu","price_eu","price","amount","value","cost","unlock","upgrade","unlock_cost"]:
+				var n := _extract_eu_any(v[k])
+				if n != 0.0:
+					return n
+		# fallback: scan all values
+		for val in v.values():
+			var n2 := _extract_eu_any(val)
+			if n2 != 0.0:
+				return n2
+	if t == TYPE_ARRAY:
+		for val in v:
+			var n3 := _extract_eu_any(val)
+			if n3 != 0.0:
+				return n3
+	return 0.0
+
 func _cost_eu_from(meta: Dictionary) -> float:
-	var eu := 0.0
+	var n := 0.0
 	if meta.has("cost"):
-		var cost = meta["cost"]
-		if typeof(cost) == TYPE_DICTIONARY:
-			if cost.has("eu"):      eu = float(cost["eu"])
-			elif cost.has("EU"):    eu = float(cost["EU"])
-			elif cost.has("Eu"):    eu = float(cost["Eu"])
-			else:
-				# fallback: first numeric-like value in the dict
-				for v in cost.values():
-					var t := typeof(v)
-					if t == TYPE_INT or t == TYPE_FLOAT: eu = float(v); break
-					elif t == TYPE_STRING:                eu = float(v); break
-		else:
-			eu = float(cost)  # supports cost: 50
-	elif meta.has("eu"):       eu = float(meta["eu"])
-	elif meta.has("EU"):       eu = float(meta["EU"])
-	elif meta.has("Eu"):       eu = float(meta["Eu"])
-	elif meta.has("price"):    eu = float(meta["price"])
-	elif meta.has("cost_eu"):  eu = float(meta["cost_eu"])
-	return eu
+		n = _extract_eu_any(meta["cost"])
+	if n == 0.0 and meta.has("eu"):
+		n = _extract_eu_any(meta["eu"])
+	if n == 0.0 and meta.has("EU"):
+		n = _extract_eu_any(meta["EU"])
+	if n == 0.0 and meta.has("price"):
+		n = _extract_eu_any(meta["price"])
+	if n == 0.0 and meta.has("unlock"):
+		n = _extract_eu_any(meta["unlock"])
+	if n == 0.0 and meta.has("unlock_cost"):
+		n = _extract_eu_any(meta["unlock_cost"])
+	if n == 0.0 and meta.has("cost_eu"):
+		n = _extract_eu_any(meta["cost_eu"])
+	return n
+
+func _get_next_level_index(key: String) -> int:
+	# prefer GameState storage if you have it; fall back to per-row memory; else 0
+	if "research_levels" in GameState:
+		return int(GameState.research_levels.get(key, 0))
+	if _rows.has(key) and _rows[key].has("level"):
+		return int(_rows[key]["level"])
+	return 0
+
+func _set_level_index(key: String, lvl: int) -> void:
+	if "research_levels" in GameState:
+		GameState.research_levels[key] = lvl
+	else:
+		if _rows.has(key):
+			_rows[key]["level"] = lvl
+
+func _cost_eu_for_next_level(key: String, item: Dictionary) -> float:
+	var levels = item.get("levels", [])
+	if typeof(levels) != TYPE_ARRAY or levels.size() == 0:
+		return 0.0
+	var idx := _get_next_level_index(key)
+	if idx >= levels.size():
+		return 0.0
+	var lvl: Dictionary = levels[idx]
+	var cost = lvl.get("cost", {})
+	if typeof(cost) == TYPE_DICTIONARY:
+		return float(cost.get("eu", 0))
+	return float(cost)  # number fallback
+
 

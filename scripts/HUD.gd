@@ -8,8 +8,8 @@ extends HBoxContainer
 
 @onready var eu_label: Label = $EuLabel
 @onready var money_label: Label = $MoneyLabel
-@onready var fuel_label: Label = $Fuel
-@onready var coolant_label: Label = $Coolant
+# @onready var fuel_label: Label = $Fuel
+# @onready var coolant_label: Label = $Coolant
 
 var _accum := 0.0
 
@@ -34,5 +34,5 @@ func _on_state_bump(_v := 0.0) -> void:
 func _refresh() -> void:
 	eu_label.text = "Eu: %.1f" % GameState.eu
 	money_label.text = "$$: %.1f" % GameState.money
-	fuel_label.text = "Fuel: %.1f" % GameState.fuel
-	coolant_label.text = "Coolant: %.1f" % GameState.coolant
+	# fuel_label.text = "Fuel: %.1f" % GameState.fuel
+	# coolant_label.text = "Coolant: %.1f" % GameState.coolant

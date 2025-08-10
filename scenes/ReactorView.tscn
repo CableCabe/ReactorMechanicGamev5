@@ -20,23 +20,47 @@ custom_minimum_size = Vector2(240, 140)
 layout_mode = 2
 color = Color(0.207843, 0.207843, 0.329412, 1)
 
-[node name="FuelLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+[node name="FuelText" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
+
+[node name="FuelLabel" type="Label" parent="MarginContainer/VBoxContainer/FuelText"]
+layout_mode = 2
+size_flags_horizontal = 3
 text = "FUEL"
+
+[node name="FuelValue" type="Label" parent="MarginContainer/VBoxContainer/FuelText"]
+layout_mode = 2
+text = "0 ml"
 
 [node name="FuelBar" type="ProgressBar" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
 
-[node name="CoolantLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+[node name="CoolantText" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
+
+[node name="CoolantLabel" type="Label" parent="MarginContainer/VBoxContainer/CoolantText"]
+layout_mode = 2
+size_flags_horizontal = 3
 text = "COOLANT"
+
+[node name="CoolantValue" type="Label" parent="MarginContainer/VBoxContainer/CoolantText"]
+layout_mode = 2
+text = "0 ml"
 
 [node name="CoolantBar" type="ProgressBar" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
 
-[node name="HeatLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+[node name="HeatText" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
+
+[node name="HeatLabel" type="Label" parent="MarginContainer/VBoxContainer/HeatText"]
+layout_mode = 2
+size_flags_horizontal = 3
 text = "HEAT"
+
+[node name="HeatValue" type="Label" parent="MarginContainer/VBoxContainer/HeatText"]
+layout_mode = 2
+text = "0k"
 
 [node name="HeatBar" type="ProgressBar" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2

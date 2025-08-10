@@ -27,29 +27,54 @@ grow_vertical = 2
 [node name="PanelContainer" type="PanelContainer" parent="VBoxContainer"]
 layout_mode = 2
 
-[node name="TopBar" type="HBoxContainer" parent="VBoxContainer/PanelContainer"]
+[node name="HEADER" type="HBoxContainer" parent="VBoxContainer/PanelContainer"]
+layout_mode = 2
+
+[node name="TopBar" type="HBoxContainer" parent="VBoxContainer/PanelContainer/HEADER"]
 custom_minimum_size = Vector2(0, 32)
 layout_mode = 2
 theme_override_constants/separation = 12
 script = ExtResource("2_y18xa")
 
-[node name="EuLabel" type="Label" parent="VBoxContainer/PanelContainer/TopBar"]
+[node name="Spacer" type="Control" parent="VBoxContainer/PanelContainer/HEADER/TopBar"]
+layout_mode = 2
+
+[node name="EuLabel" type="Label" parent="VBoxContainer/PanelContainer/HEADER/TopBar"]
 layout_mode = 2
 theme_type_variation = &"HeaderLarge"
 text = "Eu: 0"
 
-[node name="MoneyLabel" type="Label" parent="VBoxContainer/PanelContainer/TopBar"]
+[node name="MoneyLabel" type="Label" parent="VBoxContainer/PanelContainer/HEADER/TopBar"]
 layout_mode = 2
 theme_type_variation = &"HeaderLarge"
 text = "$$: 0"
 
-[node name="Fuel" type="Label" parent="VBoxContainer/PanelContainer/TopBar"]
+[node name="Fuel" type="Label" parent="VBoxContainer/PanelContainer/HEADER/TopBar"]
+visible = false
 layout_mode = 2
 text = "Fuel: 0"
 
-[node name="Coolant" type="Label" parent="VBoxContainer/PanelContainer/TopBar"]
+[node name="Coolant" type="Label" parent="VBoxContainer/PanelContainer/HEADER/TopBar"]
+visible = false
 layout_mode = 2
 text = "Coolant: 0"
+
+[node name="Spacer" type="Control" parent="VBoxContainer/PanelContainer/HEADER"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Reactor Mechanic" type="Label" parent="VBoxContainer/PanelContainer/HEADER"]
+custom_minimum_size = Vector2(0, 24.07)
+layout_mode = 2
+theme_type_variation = &"HeaderLarge"
+text = "Reactor Mechanic"
+horizontal_alignment = 2
+vertical_alignment = 1
+uppercase = true
+
+[node name="Spacer2" type="Control" parent="VBoxContainer/PanelContainer/HEADER"]
+custom_minimum_size = Vector2(6.555, 0)
+layout_mode = 2
 
 [node name="Body" type="HBoxContainer" parent="VBoxContainer"]
 custom_minimum_size = Vector2(260, 0)
@@ -91,6 +116,6 @@ value = 10.0
 layout_mode = 2
 text = "Save Game"
 
-[node name="ResearchPanel" parent="VBoxContainer/Body/Tabs" instance=ExtResource("6_okip1")]
+[node name="Research Panel" parent="VBoxContainer/Body/Tabs" instance=ExtResource("6_okip1")]
 visible = false
 layout_mode = 2
