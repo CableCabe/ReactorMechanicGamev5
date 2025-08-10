@@ -1,0 +1,36 @@
+[gd_scene load_steps=2 format=3 uid="uid://cxre5hcbhr4hy"]
+
+[ext_resource type="Script" path="res://scripts/SettingsPanel.gd" id="1_cah7v"]
+
+[node name="SettingsPanel" type="PanelContainer"]
+script = ExtResource("1_cah7v")
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "SAVE / LOAD / RESET"
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="SaveBtn" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+text = " SAVE "
+
+[node name="LoadBtn" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+text = " LOAD "
+
+[node name="ResetBtn" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+text = " RESET "
+
+[node name="ConfirmReset" type="ConfirmationDialog" parent="MarginContainer/VBoxContainer"]
+title = "WARNING"
+size = Vector2i(282, 100)
+dialog_text = "Reset game? This clears your save."

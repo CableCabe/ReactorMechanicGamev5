@@ -7,6 +7,9 @@ script = ExtResource("1_i5bm2")
 fuel_value_path = NodePath("MarginContainer/VBoxContainer/FuelText/FuelValue")
 coolant_value_path = NodePath("MarginContainer/VBoxContainer/CoolantText/CoolantValue")
 heat_value_path = NodePath("MarginContainer/VBoxContainer/HeatText/HeatValue")
+fuel_bar_path = NodePath("MarginContainer/VBoxContainer/FuelBar")
+coolant_bar_path = NodePath("MarginContainer/VBoxContainer/CoolantBar")
+heat_bar_path = NodePath("MarginContainer/VBoxContainer/HeatBar")
 
 [node name="MarginContainer" type="MarginContainer" parent="."]
 layout_mode = 2

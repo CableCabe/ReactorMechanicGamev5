@@ -11,15 +11,16 @@ var eu: float:
 			eu_changed.emit(_eu)
 
 var money: float = 0.0
-var temp: float = 20.0       # °C
-var fuel: float = 50.0
-var coolant: float = 50.0
+var heat: float = 50.0       # °C
+var fuel: float = 500.0
+var coolant: float = 500.0
 var flags: Dictionary = {"auto_sell_ratio": 0.01}
 
 var pillars: Array = []   # Array of Dictionary {"id":int, "level":int, "enabled":bool}
 
 var research_db: Dictionary = {}    # loaded JSON
 var research: Dictionary = {}       # key -> level (int)
+var research_levels: Dictionary = {}
 var fuel_cap: float = 1000.0
 var coolant_cap: float = 1000.0
 
@@ -70,8 +71,24 @@ func spend_eu(a: float) -> bool:
 
 # ---- RESEARCH LOADING ----
 func _enter_tree() -> void:
+	reset_state_defaults()
 	ensure_pillars()
 	_load_research()
+	load_game()
+	
+func reset_state_defaults() -> void:
+	eu = 0.0
+	money = 0.0
+	fuel_cap = 100.0
+	coolant_cap = 100.0
+	fuel = 0.0
+	coolant = 0.0
+	heat = 0.0
+	research_levels.clear()
+	ensure_pillars(PILLAR_COUNT)
+	state_changed.emit()
+	if has_signal("eu_changed"):
+		eu_changed.emit(eu)
 
 func _load_research() -> void:
 	var f = FileAccess.open("res://data/research.json", FileAccess.READ)
@@ -210,7 +227,7 @@ func sim_tick(dt: float) -> void:
 	var coolant_flow: float = 1.0 if coolant > 0.0 else 0.0
 	var cooling_s: float = coolant_flow * COOLANT_POWER
 	var heat_s: float = total_heat_s + produced_eu * HEAT_FACTOR
-	temp += (heat_s - cooling_s) * dt
+	heat += (heat_s - cooling_s) * dt
 	if coolant_flow > 0.0:
 		coolant = max(0.0, coolant - 0.2 * dt)
 
@@ -248,32 +265,78 @@ func pay(cost: Dictionary) -> void:
 
 
 
-# ---- Save/Load (JSON to user://save.json) ----
-func save_game() -> void:
-	var data := {
-		"eu": eu, "money": money, "temp": temp,
-		"fuel": fuel, "coolant": coolant,
-		"research": research, "flags": flags,
-		"pillars": pillars,
-	}
-	var f := FileAccess.open("user://save.json", FileAccess.WRITE)
-	f.store_string(JSON.stringify(data))
+# ---- SAVE/LOAD ----
 
-func load_game() -> void:
-	if not FileAccess.file_exists("user://save.json"):
-		return
-	var f := FileAccess.open("user://save.json", FileAccess.READ)
-	var data: Dictionary = JSON.parse_string(f.get_as_text())
-	if typeof(data) == TYPE_DICTIONARY:
-		eu = data.get("eu", eu)
-		money = data.get("money", money)
-		temp = data.get("temp", temp)
-		fuel = data.get("fuel", fuel)
-		coolant = data.get("coolant", coolant)
-		research = data.get("research", research)
-		flags = data.get("flags", flags)
-		pillars = data.get("pillars", pillars)
-		emit_signal("state_changed")
+const SAVE_PATH := "user://savegame.json"
+
+func save_game() -> void:
+	var data: Dictionary = {
+		"eu": eu,
+		"money": money,
+		"fuel": fuel,
+		"coolant": coolant,
+		"fuel_cap": fuel_cap,
+		"coolant_cap": coolant_cap,
+		"heat": heat,
+		"pillars": pillars,
+		"research_levels": research_levels
+	}
+	var f := FileAccess.open(SAVE_PATH, FileAccess.WRITE)
+	if f:
+		f.store_string(JSON.stringify(data))
+		print("Saved:", SAVE_PATH)
+
+func load_game() -> bool:
+	if not FileAccess.file_exists(SAVE_PATH):
+		return false
+	var f: FileAccess = FileAccess.open(SAVE_PATH, FileAccess.READ)
+	if not f:
+		return false
+
+	var parsed: Variant = JSON.parse_string(f.get_as_text())
+	if typeof(parsed) != TYPE_DICTIONARY:
+		return false
+	var d: Dictionary = parsed
+
+	eu = float(d.get("eu", eu))
+	money = float(d.get("money", money))
+	fuel = float(d.get("fuel", fuel))
+	coolant = float(d.get("coolant", coolant))
+	fuel_cap = float(d.get("fuel_cap", fuel_cap))
+	coolant_cap = float(d.get("coolant_cap", coolant_cap))
+	heat = float(d.get("heat", heat))
+
+	var p_any: Variant = d.get("pillars", pillars)
+	if typeof(p_any) == TYPE_ARRAY:
+		pillars = p_any
+	else:
+		pillars = []
+
+	var rl_any: Variant = d.get("research_levels", research_levels)
+	if typeof(rl_any) == TYPE_DICTIONARY:
+		research_levels = rl_any
+	else:
+		research_levels = {}
+
+	ensure_pillars(PILLAR_COUNT)   # keep model sane
+
+	state_changed.emit()
+	if has_signal("eu_changed"):
+		eu_changed.emit(eu)
+	print("Loaded:", SAVE_PATH)
+	return true
+
+func reset_save() -> void:
+	# delete file if present, then reset to defaults
+	if FileAccess.file_exists(SAVE_PATH):
+		var abs: String = ProjectSettings.globalize_path(SAVE_PATH)
+		var rc: int = DirAccess.remove_absolute(abs)
+		if rc == OK:
+			print("Removed save:", abs)
+		else:
+			push_warning("Couldn't remove save (%s), code=%d" % [abs, rc])
+	reset_state_defaults()
+
 		
 
 
