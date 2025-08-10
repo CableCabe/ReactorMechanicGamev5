@@ -1,0 +1,30 @@
+# Godot (v4+)
+.godot/
+.import/
+
+# Godot C# (if you’re using it)
+.mono/
+**/obj/
+**/bin/
+
+# Local exports/builds
+export/
+build/
+*.pck
+*.zip
+*.exe
+*.apk
+*.aab
+*.dmg
+*.app
+*.so
+*.dll
+*.dylib
+
+# Editors/OS cruft
+.vscode/
+.idea/
+*.user
+.DS_Store
+Thumbs.db
+desktop.ini
