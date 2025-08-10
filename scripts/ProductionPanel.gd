@@ -3,7 +3,7 @@ extends PanelContainer
 @onready var ignite_btn: Button         = $VBoxContainer/HBoxContainer2/IgniteBtn
 @onready var ignite_upgrade_btn: Button = $VBoxContainer/HBoxContainer2/IgniteUpgradeBtn
 @onready var vent_btn: Button           = $VBoxContainer/HBoxContainer/VentBtn
-@onready var temp_bar: Range            = $VBoxContainer/HBoxContainer/TempBar
+#@onready var temp_bar: Range            = $VBoxContainer/HBoxContainer/TempBar
 @onready var pillar_grid: GridContainer = $VBoxContainer/PillarGrid
 
 

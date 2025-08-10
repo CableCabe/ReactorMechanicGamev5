@@ -18,7 +18,7 @@ extends PanelContainer
 
 @onready var fuel_bar: ProgressBar    = get_node(fuel_bar_path) as ProgressBar
 @onready var coolant_bar: ProgressBar = get_node(coolant_bar_path) as ProgressBar
-@onready var heat_bar: ProgressBar    = get_node(heat_bar_path) as ProgressBar
+@onready var heat_bar: ProgressBar    = %HeatBar
 
 # Thresholds: green for 25–100%, yellow for 10–25%, red for <10%
 const GREEN_MIN := 0.25
@@ -28,7 +28,44 @@ var _acc: float = 0.0
 
 func _ready() -> void:
 	set_process(true)
+
+	if heat_bar:
+		heat_bar.min_value = 0
+		heat_bar.max_value = 100
+		heat_bar.step = 1.0
+		heat_bar.page = 0.0
+		heat_bar.allow_greater = false
+		heat_bar.allow_lesser = false
+	if GameState.has_signal("heat_changed"):
+		GameState.heat_changed.connect(_on_heat_changed)
+	_on_heat_changed(GameState.heat)
+
+	if fuel_bar:
+		fuel_bar.min_value = 0
+		fuel_bar.step = 1.0
+		fuel_bar.allow_greater = false
+
+	if coolant_bar:
+		coolant_bar.min_value = 0
+		coolant_bar.step = 1.0
+		coolant_bar.allow_greater = false
+
 	_refresh()
+	
+var _dbg_left := 10
+func _on_heat_changed(v: float) -> void:
+	var hp: float
+	if _dbg_left > 0:
+		_dbg_left -= 1
+		print("heat_changed -> ", v)
+	if v > 1.0:
+		hp = clamp(v / 100.0, 0.0, 1.0)
+	else:
+		hp = clamp(v, 0.0, 1.0)
+	var hv: int = int(round(hp * 100.0))
+	if heat_bar:
+		heat_bar.value = hv
+		_tint_progress_bar(heat_bar, _color_by_pct(hp, true))
 
 func _process(delta: float) -> void:
 	_acc += delta
@@ -62,11 +99,11 @@ func _refresh() -> void:
 		coolant_bar.max_value = coolant_cap
 		coolant_bar.value = clamp(GameState.coolant, 0.0, coolant_cap)
 		_tint_progress_bar(coolant_bar, _color_by_pct(GameState.coolant / max(1.0, coolant_cap), false))
+	var hp: float = _heat_pct()
+	var hv: int = int(round(hp * 100.0))
 	if heat_bar:
-		heat_bar.max_value = 100.0
-		var hpct: float = _heat_pct()
-		heat_bar.value = hpct * 100.0
-		_tint_progress_bar(heat_bar, _color_by_pct(hpct, true))
+		heat_bar.value = hv
+		_tint_progress_bar(heat_bar, _color_by_pct(hp, true))
 
 # --- helpers ---
 func _heat_pct() -> float:

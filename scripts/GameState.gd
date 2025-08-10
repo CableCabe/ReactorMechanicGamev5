@@ -11,7 +11,6 @@ var eu: float:
 			eu_changed.emit(_eu)
 
 var money: float = 0.0
-var heat: float = 50.0       # °C
 var fuel: float = 500.0
 var coolant: float = 500.0
 var flags: Dictionary = {"auto_sell_ratio": 0.01}
@@ -55,7 +54,7 @@ var _accum := 0.0
 signal research_loaded
 signal state_changed
 signal eu_changed(value)
-
+signal heat_changed(value)
 
 
 # ---- SPENDING TRACKER ----
@@ -69,7 +68,8 @@ func spend_eu(a: float) -> bool:
 	return false
 
 
-# ---- RESEARCH LOADING ----
+
+# ---- LOADING ----
 func _enter_tree() -> void:
 	reset_state_defaults()
 	ensure_pillars()
@@ -166,6 +166,34 @@ func pillar_mods(idx: int) -> Array:
 						mods.append(m)
 	return mods
 
+
+
+# ---- HEAT ----
+var _heat: float = 0.0
+var heat: float:
+	get: return _heat
+	set(value):
+		var v: float = value
+		# If your sim uses 0–100, clamp to that; if 0–1, clamp accordingly.
+		if v > 1.0:
+			v = clamp(v, 0.0, 100.0)
+		else:
+			v = clamp(v, 0.0, 1.0)
+		if not is_equal_approx(v, _heat):
+			_heat = v
+			heat_changed.emit(_heat)
+			if has_signal("state_changed"):
+				state_changed.emit()
+
+func set_heat(v: float) -> void:
+	heat = v
+
+func add_heat(d: float) -> void:
+	heat = heat + d
+
+
+
+# ---- PROCESSES ----
 
 func _process(delta: float) -> void:
 	_accum += delta

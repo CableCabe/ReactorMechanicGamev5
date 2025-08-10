@@ -93,4 +93,5 @@ custom_minimum_size = Vector2(5, 0)
 layout_mode = 2
 
 [node name="HeatBar" type="ProgressBar" parent="MarginContainer/VBoxContainer"]
+unique_name_in_owner = true
 layout_mode = 2
