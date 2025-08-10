@@ -24,7 +24,7 @@ func _ready() -> void:
 	_refresh()
 
 func _refresh() -> void:
-	var p: Dictionary = GameState.pillars[idx]
+	var p: Dictionary = GameState.get_pillar(idx)
 	var is_unlocked: bool = bool(p.get("unlocked", false))
 
 	toggle.visible = is_unlocked

@@ -4,6 +4,7 @@ extends PanelContainer
 @onready var ignite_upgrade_btn: Button = $VBoxContainer/HBoxContainer2/IgniteUpgradeBtn
 @onready var vent_btn: Button           = $VBoxContainer/HBoxContainer/VentBtn
 @onready var temp_bar: Range            = $VBoxContainer/HBoxContainer/TempBar
+@onready var pillar_grid: GridContainer = $VBoxContainer/PillarGrid
 
 
 var ignite_level: int = 0
@@ -12,6 +13,7 @@ var ignite_upgrade_cost: float = 50.0
 var ignite_cost_mult: float = 1.6
 
 func _ready() -> void:
+	GameState.ensure_pillars(PILLAR_COUNT)
 	ignite_btn.pressed.connect(_on_ignite)
 	ignite_upgrade_btn.pressed.connect(_on_ignite_upgrade)
 	vent_btn.pressed.connect(_on_vent)
@@ -20,6 +22,7 @@ func _ready() -> void:
 		GameState.connect("eu_changed", Callable(self, "_on_eu_bump"))
 
 	_refresh_buttons()
+	_build_pillars()
 
 func _on_ignite() -> void:
 	GameState.add_eu(_ignite_delta())
@@ -49,3 +52,25 @@ func _on_vent() -> void:
 
 func _on_vent_finished() -> void:
 	vent_btn.disabled = false
+
+const PILLAR_SCENE := preload("res://scenes/ReactionPillar.tscn")
+const PILLAR_COUNT := 6
+var _pillars: Array = []
+
+func _build_pillars() -> void:
+	# clear grid
+	for c in pillar_grid.get_children():
+		c.queue_free()
+	_pillars.clear()
+
+	# add pillars
+	for i in range(PILLAR_COUNT):
+		var p = PILLAR_SCENE.instantiate()
+		pillar_grid.add_child(p)
+		_pillars.append(p)
+		# pass index if your pillar script supports it
+		if p.has_method("set_pillar_index"):
+			p.set_pillar_index(i)
+		elif "pillar_index" in p:
+			p.pillar_index = i
+

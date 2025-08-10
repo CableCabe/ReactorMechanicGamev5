@@ -70,6 +70,7 @@ func spend_eu(a: float) -> bool:
 
 # ---- RESEARCH LOADING ----
 func _enter_tree() -> void:
+	ensure_pillars()
 	_load_research()
 
 func _load_research() -> void:
@@ -280,6 +281,27 @@ func load_game() -> void:
 #  ---- PILLAR STUFF ----
 
 signal pillar_fired(idx: int)
+const PILLAR_COUNT := 6
+
+func ensure_pillars(count: int = PILLAR_COUNT) -> void:
+	# Grow with sensible defaults
+	while pillars.size() < count:
+		var i := pillars.size()
+		pillars.append({
+			"unlocked": i == 0,  # first pillar unlocked by default
+			"level": 0,
+			"on": i == 0,
+		})
+
+func get_pillar(i: int) -> Dictionary:
+	ensure_pillars(i + 1)
+	return pillars[i]
+
+func set_pillar(i: int, d: Dictionary) -> void:
+	ensure_pillars(i + 1)
+	pillars[i] = d
+	if has_signal("state_changed"):
+		state_changed.emit()
 
 func unlock_cost(idx: int) -> Dictionary:
 	# 100, 200, 300 Eu… tweak to taste
