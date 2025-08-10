@@ -5,9 +5,18 @@ extends HBoxContainer
 @onready var fuel_label: Label = $Fuel
 @onready var coolant_label: Label = $Coolant
 
+signal research_loaded
+var research_db := {}
+
 func _ready() -> void:
 	GameState.eu_changed.connect(_on_eu_changed)
 	_on_eu_changed(GameState.eu)  # initialize the label
+	var f := FileAccess.open("res://data/research.json", FileAccess.READ)
+	if f:
+		var data = JSON.parse_string(f.get_as_text())
+		if typeof(data) == TYPE_DICTIONARY:
+			research_db = data
+			research_loaded.emit()
 	
 func _on_eu_changed(v: float) -> void:
 	eu_label.text = str(roundi(v))   

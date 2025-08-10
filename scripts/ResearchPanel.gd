@@ -9,11 +9,22 @@ var _rows: Dictionary = {}  # key -> {meta, buy_button, cost_label, row}
 @onready var list: VBoxContainer = $MarginContainer/VBoxContainer/ScrollContainer/List
 
 func _ready() -> void:
+	# Build only after research data exists; also listen to EU changes
 	GameState.eu_changed.connect(_refresh_affordability)
-	_build()
-	_refresh_affordability(GameState.eu)
+	if GameState.research_db.size() > 0:
+		_build()
+		_refresh_affordability(GameState.eu)
+	# If GameState emits `research_loaded` after loading JSON, hook it up.
+	if GameState.has_signal("research_loaded"):
+		GameState.connect("research_loaded", Callable(self, "_on_research_loaded"))
 
 func _build() -> void:
+	# safety: bail if db not ready
+	if GameState.research_db.size() == 0:
+		# optional: show a placeholder row so we know UI is alive
+		list.add_child(Label.new())
+		(list.get_child(list.get_child_count()-1) as Label).text = "Research data not loaded"
+		return
 	# Clear UI & data
 	for c in list.get_children():
 		c.queue_free()
@@ -24,6 +35,7 @@ func _build() -> void:
 		var meta: Dictionary = GameState.research_db[key]
 		_make_row(key, meta)
 
+# -- internal: build one row --
 func _make_row(key: String, meta: Dictionary) -> void:
 	var h := HBoxContainer.new()
 
@@ -53,6 +65,7 @@ func _make_row(key: String, meta: Dictionary) -> void:
 		"row": h,
 	}
 
+# -- internal: enable/disable buttons based on EU --
 func _refresh_affordability(_v: float) -> void:
 	# FIX: iterate current rows instead of `_all_item_rows`
 	for item in _rows.values():
@@ -64,6 +77,7 @@ func _refresh_affordability(_v: float) -> void:
 		# optional visual: dim cost label if unaffordable
 		(item["cost_label"] as Label).modulate = Color(1,1,1) if afford_ok else Color(1,0.6,0.6)
 
+# -- internal: handle Buy click --
 func _on_buy(key: String) -> void:
 	var item: Dictionary = _rows.get(key)
 	if item == null:
@@ -75,9 +89,16 @@ func _on_buy(key: String) -> void:
 		# TODO: flash not-enough animation
 		pass
 
+# -- internal: apply the effect of a research --
 func _apply_item(key: String) -> void:
 	# TODO: call into your real application logic.
 	# Example: GameState.apply_research(key)
 	# For now, just log and refresh the button state
 	print("Applied research:", key)
+	_refresh_affordability(GameState.eu)
+
+# -- callbacks --
+func _on_research_loaded() -> void:
+	# Rebuild once data arrives
+	_build()
 	_refresh_affordability(GameState.eu)
