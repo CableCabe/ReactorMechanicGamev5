@@ -10,8 +10,8 @@ func _ready() -> void:
 	_on_eu_changed(GameState.eu)  # initialize the label
 	
 func _on_eu_changed(v: float) -> void:
-	%EuLabel.text = str(round(v))
-
+	eu_label.text = str(roundi(v))   
+	
 func _refresh() -> void:
 	eu_label.text = "Eu: %.1f" % GameState.eu
 	money_label.text = "$$: %.1f" % GameState.money
