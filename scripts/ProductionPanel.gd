@@ -58,6 +58,8 @@ const PILLAR_COUNT := 6
 var _pillars: Array = []
 
 func _build_pillars() -> void:
+	GameState.ensure_pillars(PILLAR_COUNT)
+
 	# clear grid
 	for c in pillar_grid.get_children():
 		c.queue_free()
@@ -65,12 +67,14 @@ func _build_pillars() -> void:
 
 	# add pillars
 	for i in range(PILLAR_COUNT):
-		var p = PILLAR_SCENE.instantiate()
+		var p := PILLAR_SCENE.instantiate()
 		pillar_grid.add_child(p)
 		_pillars.append(p)
-		# pass index if your pillar script supports it
+
+		# hand the index to the instance
 		if p.has_method("set_pillar_index"):
 			p.set_pillar_index(i)
-		elif "pillar_index" in p:
-			p.pillar_index = i
+		else:
+			# fallback if you exported a var
+			p.set("idx", i)  # works if you have @export var idx: int
 

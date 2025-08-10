@@ -4,6 +4,9 @@
 
 [node name="ReactorView" type="PanelContainer"]
 script = ExtResource("1_i5bm2")
+fuel_value_path = NodePath("MarginContainer/VBoxContainer/FuelText/FuelValue")
+coolant_value_path = NodePath("MarginContainer/VBoxContainer/CoolantText/CoolantValue")
+heat_value_path = NodePath("MarginContainer/VBoxContainer/HeatText/HeatValue")
 
 [node name="MarginContainer" type="MarginContainer" parent="."]
 layout_mode = 2
@@ -23,6 +26,10 @@ color = Color(0.207843, 0.207843, 0.329412, 1)
 [node name="FuelText" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
 
+[node name="Spacer2" type="Control" parent="MarginContainer/VBoxContainer/FuelText"]
+custom_minimum_size = Vector2(5, 0)
+layout_mode = 2
+
 [node name="FuelLabel" type="Label" parent="MarginContainer/VBoxContainer/FuelText"]
 layout_mode = 2
 size_flags_horizontal = 3
@@ -32,10 +39,18 @@ text = "FUEL"
 layout_mode = 2
 text = "0 ml"
 
+[node name="Spacer" type="Control" parent="MarginContainer/VBoxContainer/FuelText"]
+custom_minimum_size = Vector2(5, 0)
+layout_mode = 2
+
 [node name="FuelBar" type="ProgressBar" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
 
 [node name="CoolantText" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="Spacer3" type="Control" parent="MarginContainer/VBoxContainer/CoolantText"]
+custom_minimum_size = Vector2(5, 0)
 layout_mode = 2
 
 [node name="CoolantLabel" type="Label" parent="MarginContainer/VBoxContainer/CoolantText"]
@@ -47,10 +62,18 @@ text = "COOLANT"
 layout_mode = 2
 text = "0 ml"
 
+[node name="Control3" type="Control" parent="MarginContainer/VBoxContainer/CoolantText"]
+custom_minimum_size = Vector2(5, 0)
+layout_mode = 2
+
 [node name="CoolantBar" type="ProgressBar" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
 
 [node name="HeatText" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="Spacer4" type="Control" parent="MarginContainer/VBoxContainer/HeatText"]
+custom_minimum_size = Vector2(5, 0)
 layout_mode = 2
 
 [node name="HeatLabel" type="Label" parent="MarginContainer/VBoxContainer/HeatText"]
@@ -61,6 +84,10 @@ text = "HEAT"
 [node name="HeatValue" type="Label" parent="MarginContainer/VBoxContainer/HeatText"]
 layout_mode = 2
 text = "0k"
+
+[node name="Control2" type="Control" parent="MarginContainer/VBoxContainer/HeatText"]
+custom_minimum_size = Vector2(5, 0)
+layout_mode = 2
 
 [node name="HeatBar" type="ProgressBar" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2

@@ -1,34 +1,26 @@
-class_name ReactorView
 extends PanelContainer
 
-@onready var fuel_bar: ProgressBar    = $MarginContainer/VBoxContainer/FuelBar
-@onready var coolant_bar: ProgressBar = $MarginContainer/VBoxContainer/CoolantBar
-@onready var heat_bar: ProgressBar    = $MarginContainer/VBoxContainer/HeatBar
+@export var fuel_value_path: NodePath
+@export var coolant_value_path: NodePath
+@export var heat_value_path: NodePath      # optional if you have a heat number label
 
-# Caps (we’ll tie these to research later)
-@export var fuel_cap: float = 1000.0
-@export var coolant_cap: float = 1000.0
+@onready var fuel_value: Label    = get_node(fuel_value_path) as Label
+@onready var coolant_value: Label = get_node(coolant_value_path) as Label
+@onready var heat_value: Label    = get_node(heat_value_path) as Label
+
+var _acc := 0.0
 
 func _ready() -> void:
-	GameState.state_changed.connect(_refresh)
+	set_process(true)
 	_refresh()
 
+func _process(d: float) -> void:
+	_acc += d
+	if _acc >= 0.25:
+		_acc = 0.0
+		_refresh()
+
 func _refresh() -> void:
-
-	# Bars
-	fuel_bar.max_value = fuel_cap
-	fuel_bar.value = GameState.fuel
-
-	coolant_bar.max_value = coolant_cap
-	coolant_bar.value = GameState.coolant
-
-	heat_bar.max_value = GameState.OVERHEAT
-	heat_bar.value = GameState.temp
-
-	# Optional: warning thresholds for Heat
-	# if heat_bar.value >= GameState.OVERHEAT * 0.9:
-	#     heat_bar.add_theme_color_override("fg_color", Color(1,0.2,0.2))
-	# elif heat_bar.value >= GameState.OVERHEAT * 0.7:
-	#     heat_bar.add_theme_color_override("fg_color", Color(1,0.8,0.2))
-	# else:
-	#     heat_bar.remove_theme_color_override("fg_color")
+	fuel_value.text = "%0.0f ml" % GameState.fuel
+	coolant_value.text = "%0.0f ml" % GameState.coolant
+	heat_value.text = "%0.0f f" % GameState.temp

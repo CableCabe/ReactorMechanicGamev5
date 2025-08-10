@@ -46,6 +46,9 @@ func _refresh() -> void:
 		var uc: Dictionary = GameState.unlock_cost(idx)
 		unlock_btn.text = "Unlock (Eu %.0f)" % float(uc.get("eu", 0.0))
  
+func set_pillar_index(i: int) -> void:
+	idx = i
+	_refresh()
 
 func _on_toggle(on: bool) -> void:
 	GameState.toggle_pillar(idx, on)
