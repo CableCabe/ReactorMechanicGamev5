@@ -87,13 +87,16 @@ clip_contents = true
 custom_minimum_size = Vector2(260, 0)
 layout_mode = 2
 
+[node name="SPACER" type="Control" parent="VBoxContainer/Body"]
+custom_minimum_size = Vector2(5, 0)
+layout_mode = 2
+
 [node name="Tabs" type="TabContainer" parent="VBoxContainer/Body"]
 clip_contents = true
 layout_mode = 2
 size_flags_horizontal = 3
 
 [node name="Production" parent="VBoxContainer/Body/Tabs" instance=ExtResource("3_3prin")]
-visible = false
 layout_mode = 2
 
 [node name="Research" parent="VBoxContainer/Body/Tabs" instance=ExtResource("6_okip1")]
@@ -104,4 +107,5 @@ layout_mode = 2
 layout_mode = 2
 
 [node name="Settings" parent="VBoxContainer/Body/Tabs" instance=ExtResource("7_iekhs")]
+visible = false
 layout_mode = 2
