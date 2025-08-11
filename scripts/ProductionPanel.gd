@@ -8,6 +8,7 @@ extends PanelContainer
 const HEAT_PULSE_PER_IGNITE: float = 6.0
 const PILLAR_SCENE := preload("res://scenes/ReactionPillar.tscn")
 const PILLAR_COUNT := 6
+const COOLANT_PER_IGNITE: float = 2.0   # ml per manual ignite (tweak)
 var _pillars: Array = []
 
 var ignite_level: int = 0
@@ -40,14 +41,16 @@ func _process(delta: float) -> void:
 
 func _on_ignite() -> void:
 	# Spend a little fuel and add EU using your heat multiplier if desired
+	if GameState.coolant < GameState.COOLANT_PER_IGNITE:
+		return
 	if GameState.has_method("add_fuel"):
 		GameState.add_fuel(-GameState.FUEL_PER_IGNITE)
-	var mult: float = 1.0
-	if GameState.has_method("heat_rate_mult"):
-		mult = GameState.heat_rate_mult()
+	if GameState.has_method("add_coolant"):
+		GameState.add_coolant(-GameState.COOLANT_PER_IGNITE)
+	
+	var mult: float = GameState.heat_rate_mult()
 	GameState.add_eu(_ignite_delta() * mult)
-	if GameState.has_method("add_heat_pulse"):
-		GameState.add_heat_pulse(GameState.IGNITE_HEAT_PULSE)
+	GameState.add_heat_pulse(GameState.IGNITE_HEAT_PULSE)
 
 func _ignite_delta() -> float:
 	return ignite_base + float(ignite_level)

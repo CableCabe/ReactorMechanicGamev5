@@ -51,7 +51,8 @@ func set_pillar_index(i: int) -> void:
 	_refresh()
 
 func _on_toggle(on: bool) -> void:
-	GameState.toggle_pillar(idx, on)
+	GameState.set_pillar_enabled(idx, on)
+	_refresh()
 
 func _on_upgrade() -> void:
 	GameState.upgrade_pillar(idx)

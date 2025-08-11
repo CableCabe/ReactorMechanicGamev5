@@ -25,14 +25,17 @@ var research_levels: Dictionary = {}
 
 # PILLARS
 var pillars: Array = []   # Array of Dictionary {"id":int, "level":int, "enabled":bool}
+var _pillar_accum: Array = []            # per-pillar timers
 
 const NUM_PILLARS := 6
+const PILLAR_COUNT := 6
 const BASE_PILLAR_INTERVAL_S := 2.0      # default time between ignitions
 const MIN_PILLAR_INTERVAL_S  := 0.3      # clamp after research
 const PILLAR_PULSE_EU        := 1.2      # Eu per ignition before multipliers
 const PILLAR_PULSE_HEAT      := 0.6      # Heat contribution per ignition
 const PILLAR_FUEL_PULSE      := 0.06     # Fuel burned per ignition
 const PILLAR_LEVEL_BONUS     := 0.20     # +20% Eu per level (same as before)
+const PILLAR_EU_BASE: float = 1.0         # Eu per shot at Lv1 (tweak)
 
 # FUEL
 var fuel_cap: float = 1000.0
@@ -49,7 +52,7 @@ var fuel: float:
 
 const FUEL_BURN_S := 0.0002
 const FUEL_CAP     := 1000.0
-const FUEL_START_FRAC: float = 0.50
+const FUEL_START_FRAC: float = 0.90
 const FUEL_PER_IGNITE: float = 1.0             # ml spent per manual ignite
 const FUEL_REFILL_PER_SEC: float = 0.0      # set >0 if you want passive refuel
 
@@ -66,13 +69,14 @@ var coolant: float:
 			if has_signal("state_changed"):
 				state_changed.emit()
 
-const COOLANT_START_FRAC: float = 0.50
+const COOLANT_START_FRAC: float = 0.90
 const COOLANT_USE_PER_SEC_BASE: float = 0.0     # baseline pump use
 const COOLANT_USE_PER_SEC_WHEN_COOLING: float = 2.0   # extra when heat > ambient
 const COOLANT_USE_PER_SEC_WHEN_VENT: float = 8.0      # extra while venting
 const COOLANT_REFILL_PER_SEC: float = 0.0       # set >0 for passive refill
 const COOLANT_POWER := 0.6
 const COOLANT_CAP  := 1000.0   
+const COOLANT_PER_IGNITE: float = 2.0
 
 # HEAT
 const BASE_HEAT_S := 0.4
@@ -93,6 +97,7 @@ const VENT_DROP_TOTAL: float = 18.0
 var is_venting: bool = false
 var _vent_timer: Timer
 var _vent_cool_remaining: float = 0.0
+var _vent_rate: float = 0.0                 # % points per second during vent
 
 # Fixed‑timestep accumulator (10 Hz)
 const STEP := 0.1
@@ -109,6 +114,7 @@ signal vent_started
 signal vent_finished
 signal fuel_changed(value)
 signal coolant_changed(value)
+signal pillar_fired(idx: int)
 
 
 # ---- SPENDING TRACKER ----
@@ -279,6 +285,7 @@ func start_venting(duration: float = VENT_DURATION_SEC) -> void:
 	if is_venting:
 		return
 	is_venting = true
+	_vent_rate = VENT_DROP_TOTAL / max(duration, 0.001)
 	_vent_cool_remaining = VENT_DROP_TOTAL
 	vent_started.emit()
 	_vent_timer.stop()
@@ -287,6 +294,7 @@ func start_venting(duration: float = VENT_DURATION_SEC) -> void:
 
 func _on_vent_timeout() -> void:
 	is_venting = false
+	_vent_rate = 0.0
 	_vent_cool_remaining = 0.0
 	vent_finished.emit()
 
@@ -297,9 +305,6 @@ func _on_vent_timeout() -> void:
 func _process(delta: float) -> void:
 	
 	# DEBUGGING
-	
-	if is_venting:
-		print("VENT TICK  step=", step, "  heat=", heat)
 	
 	
 	# MAIN
@@ -377,7 +382,7 @@ func sim_tick(dt: float) -> void:
 	var produced_eu: float = 0.0
 	var heat_pulse: float = 0.0
 	var total_heat_s: float = BASE_HEAT_S
-
+	_tick_pillars(dt)
 	var gstats: Dictionary = base_stats()
 	apply_mods(gstats, global_mods())
 	var interval: float = effective_interval(gstats)
@@ -421,6 +426,15 @@ func sim_tick(dt: float) -> void:
 	eu += produced_eu
 	if dt > 0.0:
 		total_heat_s += heat_pulse / dt
+		
+	if is_venting:
+		var step: float = _vent_rate * dt           # % points this tick
+		if step > _vent_cool_remaining:
+			step = _vent_cool_remaining
+		_vent_cool_remaining -= step
+		set_heat(heat - step)                        # use the setter so UI updates
+		# print("VENT TICK  step=", step, "  heat=", heat)   # optional debug
+		return                                       # skip normal warm/cool this tick
 
 	# cooling & heat application
 	var coolant_flow: float = 1.0 if coolant > 0.0 else 0.0
@@ -435,8 +449,10 @@ func sim_tick(dt: float) -> void:
 	if sell_eu > 0.0:
 		eu -= sell_eu
 		money += (sell_eu / 10.0) * current_price()
+		
 
 	emit_signal("state_changed")
+	
 
 
 #  ---- ECONOMY STUFF ----
@@ -542,28 +558,23 @@ func reset_save() -> void:
 
 #  ---- PILLAR STUFF ----
 
-signal pillar_fired(idx: int)
-const PILLAR_COUNT := 6
-
-func ensure_pillars(count: int = PILLAR_COUNT) -> void:
-	# Grow with sensible defaults
-	while pillars.size() < count:
-		var i := pillars.size()
-		pillars.append({
-			"unlocked": i == 0,  # first pillar unlocked by default
-			"level": 0,
-			"on": i == 0,
-		})
+func ensure_pillars(n: int) -> void:
+	while pillars.size() < n:
+		var i: int = pillars.size()
+		pillars.append({"unlocked": i == 0, "level": 1, "enabled": true})
+	while _pillar_accum.size() < n:
+		_pillar_accum.append(0.0)
 
 func get_pillar(i: int) -> Dictionary:
-	ensure_pillars(i + 1)
+	if i < 0 or i >= pillars.size():
+		return {}
 	return pillars[i]
 
-func set_pillar(i: int, d: Dictionary) -> void:
-	ensure_pillars(i + 1)
-	pillars[i] = d
-	if has_signal("state_changed"):
-		state_changed.emit()
+func set_pillar_enabled(i: int, on: bool) -> void:
+	if i < 0 or i >= pillars.size():
+		return
+	pillars[i]["enabled"] = on
+
 
 func unlock_cost(idx: int) -> Dictionary:
 	# 100, 200, 300 Eu… tweak to taste
@@ -584,6 +595,16 @@ func effective_interval(gstats: Dictionary) -> float:
 	var rate: float = float(gstats.get("fire_rate_mult", 1.0))
 	var interval: float = BASE_PILLAR_INTERVAL_S / max(0.1, rate)
 	return float(max(MIN_PILLAR_INTERVAL_S, interval))
+
+func _pillar_interval(i: int) -> float:
+	var p: Dictionary = get_pillar(i)
+	var lvl: int = int(p.get("level", 1))
+	var lvl_mult: float = max(0.4, 1.0 - 0.10 * float(lvl - 1))   # faster with level
+	var rate_mult: float = heat_rate_mult()                       # 0.5 outside sweet spot
+	if rate_mult <= 0.0:
+		rate_mult = 0.01
+	return BASE_PILLAR_INTERVAL_S * lvl_mult / rate_mult
+
 
 func pillar_pulse_eu(idx: int) -> float:
 	var g: Dictionary = base_stats(); apply_mods(g, global_mods())
@@ -626,7 +647,24 @@ func upgrade_pillar(idx: int) -> void:
 	pillars[idx]["level"] = lvl + 1
 	emit_signal("state_changed")
 	
-	
+func _tick_pillars(dt: float) -> void:
+	var count: int = min(PILLAR_COUNT, pillars.size())
+	for i in range(count):
+		var p: Dictionary = pillars[i]
+		if not bool(p.get("unlocked", false)):
+			continue
+		if not bool(p.get("enabled", true)):
+			continue
+		_pillar_accum[i] = _pillar_accum[i] + dt
+		var need: float = _pillar_interval(i)
+		while _pillar_accum[i] >= need:
+			_pillar_accum[i] = _pillar_accum[i] - need
+			var lvl: int = int(p.get("level", 1))
+			var eu_gain: float = PILLAR_EU_BASE * float(lvl)
+			add_eu(eu_gain)
+			add_heat_pulse(IGNITE_HEAT_PULSE * 0.25)  # tiny heat nudge
+			pillar_fired.emit(i)
+
 	
 #  ---- RESEARCH STUFF ----
 	
