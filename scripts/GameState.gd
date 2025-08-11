@@ -53,7 +53,7 @@ var fuel: float:
 const FUEL_BURN_S := 0.0002
 const FUEL_CAP     := 1000.0
 const FUEL_START_FRAC: float = 0.90
-const FUEL_PER_IGNITE: float = 1.0             # ml spent per manual ignite
+const FUEL_PER_IGNITE: float = 0.01             # ml spent per manual ignite
 const FUEL_REFILL_PER_SEC: float = 0.0      # set >0 if you want passive refuel
 
 # COOLANT
@@ -76,7 +76,7 @@ const COOLANT_USE_PER_SEC_WHEN_VENT: float = 8.0      # extra while venting
 const COOLANT_REFILL_PER_SEC: float = 0.0       # set >0 for passive refill
 const COOLANT_POWER := 0.6
 const COOLANT_CAP  := 1000.0   
-const COOLANT_PER_IGNITE: float = 2.0
+const COOLANT_PER_IGNITE: float = 0.02
 
 # HEAT
 const BASE_HEAT_S := 0.4
@@ -133,7 +133,7 @@ func spend_eu(a: float) -> bool:
 func _enter_tree() -> void:
 	set_process(true)
 	reset_state_defaults()
-	ensure_pillars()
+	ensure_pillars(PILLAR_COUNT)
 	_load_research()
 	load_game()
 	var t := Timer.new()
