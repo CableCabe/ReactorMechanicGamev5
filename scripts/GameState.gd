@@ -47,9 +47,10 @@ var fuel: float:
 		if not is_equal_approx(v, _fuel):
 			_fuel = v
 			fuel_changed.emit(_fuel)
-			if has_signal("state_changed"): state_changed.emit()
+			if has_signal("state_changed"):
+				state_changed.emit()
 
-const FUEL_BURN_S := 0.05
+const FUEL_BURN_S := 0.0002
 const FUEL_CAP     := 1000.0
 const FUEL_START_FRAC: float = 0.50
 const FUEL_PER_IGNITE: float = 1.0             # ml spent per manual ignite
@@ -64,24 +65,33 @@ var coolant: float:
 		if not is_equal_approx(v, _coolant):
 			_coolant = v
 			coolant_changed.emit(_coolant)
-			if has_signal("state_changed"): state_changed.emit()
+			if has_signal("state_changed"):
+				state_changed.emit()
 
 const COOLANT_START_FRAC: float = 0.50
 const COOLANT_USE_PER_SEC_BASE: float = 0.0     # baseline pump use
 const COOLANT_USE_PER_SEC_WHEN_COOLING: float = 2.0   # extra when heat > ambient
 const COOLANT_USE_PER_SEC_WHEN_VENT: float = 8.0      # extra while venting
 const COOLANT_REFILL_PER_SEC: float = 0.0       # set >0 for passive refill
+const COOLANT_POWER := 0.6
+const COOLANT_CAP  := 1000.0   
 
 # HEAT
 const BASE_HEAT_S := 0.4
 const HEAT_FACTOR := 0.02
-const COOLANT_POWER := 0.6
-const COOLANT_CAP  := 1000.0       
+const HEAT_START: float = 50.0
+const BASE_COOL_PER_SEC: float = 1.5
+const COOLANT_COOL_FULL_PER_SEC: float = 8.0
+const IDLE_COOL_DELAY: float = 3.0
+const IDLE_COOL_PER_SEC: float = 4.0
+const AMBIENT_WARM_PER_SEC: float = 1.0
+const IGNITE_HEAT_PULSE: float = 1.8
+const VENT_COOL_PER_SEC: float = 50.0
 
 # Fixed‑timestep accumulator (10 Hz)
 const STEP := 0.1
 var _accum := 0.0
-
+var _time_since_ignite: float = 0.0
 
 
 # ---- SIGNALS ----
@@ -215,14 +225,6 @@ func pillar_mods(idx: int) -> Array:
 
 
 # ---- HEAT ----
-const HEAT_START: float = 50.0        # start near the sweet spot (percent)
-const BASE_COOL_PER_SEC: float = 2.0  # passive cooling toward ambient
-const COOLANT_COOL_FULL_PER_SEC: float = 8.0  # extra cooling at 100% coolant fill
-const IDLE_COOL_DELAY: float = 3.0    # no ignitions for this many seconds...
-const IDLE_COOL_PER_SEC: float = 4.0  # ...adds bonus cooling
-const AMBIENT_WARM_PER_SEC: float = 1.0  # gentle drift back toward HEAT_START
-const IGNITE_HEAT_PULSE: float = 6.0  # heat added per manual ignite (percent points)
-const VENT_COOL_PER_SEC: float = 30.0 # extra cooling while venting
 
 var _heat: float = HEAT_START
 var heat: float:
@@ -242,11 +244,11 @@ var heat: float:
 
 var sim_ready: bool = false
 var is_venting: bool = false  # keep if you already had it
-var _time_since_ignite: float = 0.0
 
 func add_heat_pulse(amount: float) -> void:
+	var k: float = 0.5 + min(_time_since_ignite, 1.0) * 0.5
+	heat = heat + amount * k
 	_time_since_ignite = 0.0
-	heat = heat + amount
 
 func set_heat(v: float) -> void:
 	heat = v
@@ -283,8 +285,7 @@ func _process(delta: float) -> void:
 	while _accum >= STEP:
 		sim_tick(STEP)
 		_accum -= STEP
-	if not sim_ready:
-		return
+	if not sim_ready: return
 	_time_since_ignite += delta
 
 	# Passive cooling
@@ -309,11 +310,11 @@ func _process(delta: float) -> void:
 	# Coolant: baseline pump + extra when actually cooling, + big use while venting
 	var cool_use: float = COOLANT_USE_PER_SEC_BASE
 	if _heat > HEAT_START:
-		cool_use += COOLANT_USE_PER_SEC_WHEN_COOLING * ((_heat - HEAT_START) / 50.0)  # scale with how hot
+		cool_use += COOLANT_USE_PER_SEC_WHEN_COOLING * ((_heat - HEAT_START) / 50.0)  # scales with how hot
 	if is_venting:
 		cool_use += COOLANT_USE_PER_SEC_WHEN_VENT
 	if cool_use > 0.0 and _coolant > 0.0:
-		add_coolant(-cool_use * delta)
+		add_coolant(-cool_use * delta)  # note the minus: using coolant	
 	# Gentle drift back toward the ambient target (HEAT_START)
 	var warm: float = AMBIENT_WARM_PER_SEC * (HEAT_START - _heat)
 	
@@ -323,6 +324,16 @@ func _process(delta: float) -> void:
 
 	var dheat: float = (warm - cool) * delta
 	heat = _heat + dheat
+
+# ---- FUEL/COOLING ----
+
+func add_fuel(d: float) -> void:
+	fuel = _fuel + d
+
+func add_coolant(d: float) -> void:
+	coolant = _coolant + d
+
+# ---- SIM TICK ----
 
 func sim_tick(dt: float) -> void:
 	# --- pulsed production from pillars ---
