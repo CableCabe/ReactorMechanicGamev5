@@ -104,6 +104,7 @@ visible = false
 layout_mode = 2
 
 [node name="Market" parent="VBoxContainer/Body/Tabs" instance=ExtResource("6_8ag56")]
+visible = false
 layout_mode = 2
 
 [node name="Settings" parent="VBoxContainer/Body/Tabs" instance=ExtResource("7_iekhs")]

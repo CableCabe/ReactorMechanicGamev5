@@ -104,28 +104,6 @@ const STEP := 0.1
 var _accum := 0.0
 var _time_since_ignite: float = 0.0
 
-# MARKET
-const SELL_EU_RATE: float = 0.10                # $ per 1 Eu when selling
-const AUTO_SELL_RATE_EU_PER_SEC: float = 2.0    # Eu/s while auto‑sell is ON
-
-const MKT_FUEL_PACK_AMOUNT: float = 50.0
-const MKT_COOLANT_PACK_AMOUNT: float = 50.0
-
-const MKT_FUEL_PACK_BASE_COST: float = 25.0
-const MKT_COOLANT_PACK_BASE_COST: float = 25.0
-
-const MKT_STORAGE_STEP: float = 100.0
-const MKT_FUEL_STORAGE_BASE_COST: float = 60.0
-const MKT_COOLANT_STORAGE_BASE_COST: float = 60.0
-
-var market_auto_sell: bool = false
-var _market_fuel_buys: int = 0
-var _market_coolant_buys: int = 0
-var _market_fuel_store_buys: int = 0
-var _market_coolant_store_buys: int = 0
-
-var _market_timer: Timer
-
 
 # ---- SIGNALS ----
 signal research_loaded
@@ -137,7 +115,6 @@ signal vent_finished
 signal fuel_changed(value)
 signal coolant_changed(value)
 signal pillar_fired(idx: int)
-signal money_changed(value)
 
 
 # ---- SPENDING TRACKER ----
@@ -170,12 +147,6 @@ func _enter_tree() -> void:
 	_vent_timer.one_shot = true
 	add_child(_vent_timer)
 	_vent_timer.timeout.connect(_on_vent_timeout)
-	_market_timer = Timer.new()
-	_market_timer.wait_time = 0.5
-	_market_timer.one_shot = false
-	add_child(_market_timer)
-	_market_timer.timeout.connect(_on_market_timeout)
-	_market_timer.start()	
 	
 func reset_state_defaults() -> void:
 	eu = 0.0
@@ -505,111 +476,9 @@ func pay(cost: Dictionary) -> void:
 	if cost.has("eu"):
 		eu -= float(cost["eu"]) 
 	if cost.has("money"):
-		money -= float(cost["money"])
+		money -= float(cost["money"]) 
 
 
-
-# ---- MARKET ----
-
-func add_money(d: float) -> void:
-	money = money + d
-	money_changed.emit(money)
-
-func spend_money(cost: float) -> bool:
-	if money < cost:
-		return false
-	money = money - cost
-	money_changed.emit(money)
-	return true
-
-func set_market_auto_sell(on: bool) -> void:
-	market_auto_sell = on
-
-func sell_eu(amount: float) -> float:
-	var a: float = clamp(amount, 0.0, eu)
-	if a <= 0.0:
-		return 0.0
-	eu = eu - a
-	eu_changed.emit(eu)
-	var earned: float = a * SELL_EU_RATE
-	add_money(earned)
-	return earned
-
-func _on_market_timeout() -> void:
-	if not market_auto_sell:
-		return
-	var dt: float = _market_timer.wait_time
-	var to_sell: float = AUTO_SELL_RATE_EU_PER_SEC * dt
-	sell_eu(to_sell)
-
-func market_fuel_price() -> float:
-	return MKT_FUEL_PACK_BASE_COST * pow(1.15, float(_market_fuel_buys))
-
-func market_coolant_price() -> float:
-	return MKT_COOLANT_PACK_BASE_COST * pow(1.15, float(_market_coolant_buys))
-
-func market_fuel_storage_price() -> float:
-	return MKT_FUEL_STORAGE_BASE_COST * pow(1.25, float(_market_fuel_store_buys))
-
-func market_coolant_storage_price() -> float:
-	return MKT_COOLANT_STORAGE_BASE_COST * pow(1.25, float(_market_coolant_store_buys))
-
-# New: proportional price helpers for partial packs
-func market_fuel_price_for_amount(amount: float) -> float:
-	if amount <= 0.0:
-		return 0.0
-	var pack: float = MKT_FUEL_PACK_AMOUNT
-	var frac: float = clamp(amount / pack, 0.0, 1.0)
-	return market_fuel_price() * frac
-
-func market_coolant_price_for_amount(amount: float) -> float:
-	if amount <= 0.0:
-		return 0.0
-	var pack: float = MKT_COOLANT_PACK_AMOUNT
-	var frac: float = clamp(amount / pack, 0.0, 1.0)
-	return market_coolant_price() * frac
-
-func market_buy_fuel_pack() -> bool:
-	var space: float = max(0.0, fuel_cap - fuel)
-	var amount: float = min(MKT_FUEL_PACK_AMOUNT, space)
-	if amount <= 0.0:
-		return false
-	var cost: float = market_fuel_price_for_amount(amount)
-	if not spend_money(cost):
-		return false
-	add_fuel(amount)
-	_market_fuel_buys += 1
-	return true
-
-func market_buy_coolant_pack() -> bool:
-	var space: float = max(0.0, coolant_cap - coolant)
-	var amount: float = min(MKT_COOLANT_PACK_AMOUNT, space)
-	if amount <= 0.0:
-		return false
-	var cost: float = market_coolant_price_for_amount(amount)
-	if not spend_money(cost):
-		return false
-	add_coolant(amount)
-	_market_coolant_buys += 1
-	return true
-
-func market_buy_fuel_storage() -> bool:
-	var cost: float = market_fuel_storage_price()
-	if not spend_money(cost):
-		return false
-	fuel_cap = fuel_cap + MKT_STORAGE_STEP
-	_market_fuel_store_buys += 1
-	state_changed.emit()    # let UIs refresh capacity
-	return true
-
-func market_buy_coolant_storage() -> bool:
-	var cost: float = market_coolant_storage_price()
-	if not spend_money(cost):
-		return false
-	coolant_cap = coolant_cap + MKT_STORAGE_STEP
-	_market_coolant_store_buys += 1
-	state_changed.emit()
-	return true
 
 # ---- SAVE/LOAD ----
 
@@ -625,14 +494,7 @@ func save_game() -> void:
 		"coolant_cap": coolant_cap,
 		"heat": heat,
 		"pillars": pillars,
-		"research_levels": research_levels,
-		"market": {
-			"auto_sell": market_auto_sell,
-	   		"fuel_buys": _market_fuel_buys,
-	   		"coolant_buys": _market_coolant_buys,
-	   		"fuel_store_buys": _market_fuel_store_buys,
-			"coolant_store_buys": _market_coolant_store_buys
-		}
+		"research_levels": research_levels
 	}
 	var f := FileAccess.open(SAVE_PATH, FileAccess.WRITE)
 	if f:
@@ -643,25 +505,13 @@ func load_game() -> bool:
 	if not FileAccess.file_exists(SAVE_PATH):
 		return false
 	var f: FileAccess = FileAccess.open(SAVE_PATH, FileAccess.READ)
+	if not f:
+		return false
+
 	var parsed: Variant = JSON.parse_string(f.get_as_text())
 	if typeof(parsed) != TYPE_DICTIONARY:
 		return false
 	var d: Dictionary = parsed
-	if not f:
-		return false
-	if d.has("market"):
-		var m: Dictionary = d.get("market")
-		market_auto_sell = bool(m.get("auto_sell", false))
-		_market_fuel_buys = int(m.get("fuel_buys", 0))
-		_market_coolant_buys = int(m.get("coolant_buys", 0))
-		_market_fuel_store_buys = int(m.get("fuel_store_buys", 0))
-		_market_coolant_store_buys = int(m.get("coolant_store_buys", 0))
-	else:
-		market_auto_sell = false
-		_market_fuel_buys = 0
-		_market_coolant_buys = 0
-		_market_fuel_store_buys = 0
-		_market_coolant_store_buys = 0
 
 	eu = float(d.get("eu", eu))
 	money = float(d.get("money", money))

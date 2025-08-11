@@ -3,7 +3,11 @@
 [ext_resource type="Script" path="res://scripts/MarketPanel.gd" id="1_xkucg"]
 
 [node name="Market Panel" type="PanelContainer"]
-visible = false
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 script = ExtResource("1_xkucg")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="."]
@@ -11,8 +15,92 @@ layout_mode = 2
 
 [node name="Label" type="Label" parent="VBoxContainer"]
 layout_mode = 2
+theme_type_variation = &"HeaderMedium"
+text = " FUEL / COOLANT STOCKS"
+
+[node name="FCBuyContainer" type="HBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 0
+
+[node name="SPACER" type="Control" parent="VBoxContainer/FCBuyContainer"]
+custom_minimum_size = Vector2(10, 0)
+layout_mode = 2
+
+[node name="BuyFuelBtn" type="Button" parent="VBoxContainer/FCBuyContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+text = "BUY: FUEL"
+
+[node name="FuelStorageBtn" type="Button" parent="VBoxContainer/FCBuyContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+text = "BUY: FUEL STORAGE"
+
+[node name="SPACER2" type="Control" parent="VBoxContainer/FCBuyContainer"]
+custom_minimum_size = Vector2(20, 0)
+layout_mode = 2
+
+[node name="BuyCoolantBtn" type="Button" parent="VBoxContainer/FCBuyContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+text = "BUY: COOLANT"
+
+[node name="CoolantStorageBtn" type="Button" parent="VBoxContainer/FCBuyContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+text = "BUY: COOLANT STORAGE"
+
+[node name="SPACER3" type="Control" parent="VBoxContainer/FCBuyContainer"]
+custom_minimum_size = Vector2(10, 0)
+layout_mode = 2
+
+[node name="SPACER4" type="Control" parent="VBoxContainer"]
+custom_minimum_size = Vector2(0, 10)
+layout_mode = 2
+
+[node name="Label2" type="Label" parent="VBoxContainer"]
+layout_mode = 2
+theme_type_variation = &"HeaderMedium"
+text = " SELL EU"
+
+[node name="EuSaleContainer" type="HBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 0
+
+[node name="SPACER6" type="Control" parent="VBoxContainer/EuSaleContainer"]
+custom_minimum_size = Vector2(10, 0)
+layout_mode = 2
+
+[node name="SPACER8" type="Control" parent="VBoxContainer/EuSaleContainer"]
+custom_minimum_size = Vector2(10, 0)
+layout_mode = 2
+
+[node name="SellToggle" type="Button" parent="VBoxContainer/EuSaleContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(60, 0)
+layout_mode = 2
+text = "AUTO"
+
+[node name="SPACER7" type="Control" parent="VBoxContainer/EuSaleContainer"]
+custom_minimum_size = Vector2(10, 0)
+layout_mode = 2
+
+[node name="Label" type="Label" parent="VBoxContainer/EuSaleContainer"]
+layout_mode = 2
 text = "Sell: 0% auto"
 
-[node name="SellSlider" type="HSlider" parent="VBoxContainer"]
+[node name="SPACER4" type="Control" parent="VBoxContainer/EuSaleContainer"]
+custom_minimum_size = Vector2(10, 0)
 layout_mode = 2
-value = 10.0
+
+[node name="SellSlider" type="HSlider" parent="VBoxContainer/EuSaleContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="SPACER5" type="Control" parent="VBoxContainer/EuSaleContainer"]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
