@@ -3,9 +3,10 @@ extends PanelContainer
 @onready var ignite_btn: Button         = $VBoxContainer/HBoxContainer2/IgniteBtn
 @onready var ignite_upgrade_btn: Button = $VBoxContainer/HBoxContainer2/IgniteUpgradeBtn
 @onready var vent_btn: Button           = $VBoxContainer/HBoxContainer/VentBtn
-#@onready var temp_bar: Range            = $VBoxContainer/HBoxContainer/TempBar
+@onready var temp_bar: Range            = $VBoxContainer/HBoxContainer/TempBar
 @onready var pillar_grid: GridContainer = $VBoxContainer/PillarGrid
 
+const HEAT_PULSE_PER_IGNITE: float = 6.0
 
 var ignite_level: int = 0
 var ignite_base: float = 2.0
@@ -21,6 +22,10 @@ func _ready() -> void:
 	if GameState.has_signal("eu_changed"):
 		GameState.connect("eu_changed", Callable(self, "_on_eu_bump"))
 
+	if GameState.has_signal("heat_changed"):
+		GameState.heat_changed.connect(_on_heat_changed)
+	_on_heat_changed(GameState.heat)
+	
 	_refresh_buttons()
 	_build_pillars()
 
@@ -35,6 +40,14 @@ func _on_ignite_upgrade() -> void:
 		ignite_level += 1
 		ignite_upgrade_cost = ceil(ignite_upgrade_cost * ignite_cost_mult)
 		_refresh_buttons()
+	var mult: float = GameState.heat_rate_mult()
+	var eu_gain: float = _ignite_delta() * mult
+	GameState.add_eu(eu_gain)	
+
+func _on_heat_changed(v: float) -> void:
+	# Keep the Production panel TempBar in sync (0..100)
+	if temp_bar:
+		temp_bar.value = int(round(v))
 
 func _on_eu_bump(_v := 0.0) -> void:
 	_refresh_buttons()

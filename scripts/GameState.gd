@@ -55,6 +55,8 @@ signal research_loaded
 signal state_changed
 signal eu_changed(value)
 signal heat_changed(value)
+signal vent_started
+signal vent_finished
 
 
 # ---- SPENDING TRACKER ----
@@ -71,10 +73,18 @@ func spend_eu(a: float) -> bool:
 
 # ---- LOADING ----
 func _enter_tree() -> void:
+	set_process(true)
 	reset_state_defaults()
 	ensure_pillars()
 	_load_research()
 	load_game()
+	var t := Timer.new()
+	t.one_shot = true
+	t.wait_time = 0.6
+	add_child(t)
+	t.timeout.connect(func():
+		sim_ready = true
+		t.queue_free())
 	
 func reset_state_defaults() -> void:
 	eu = 0.0
@@ -169,21 +179,38 @@ func pillar_mods(idx: int) -> Array:
 
 
 # ---- HEAT ----
-var _heat: float = 0.0
+const HEAT_START: float = 50.0        # start near the sweet spot (percent)
+const BASE_COOL_PER_SEC: float = 2.0  # passive cooling toward ambient
+const COOLANT_COOL_FULL_PER_SEC: float = 8.0  # extra cooling at 100% coolant fill
+const IDLE_COOL_DELAY: float = 3.0    # no ignitions for this many seconds...
+const IDLE_COOL_PER_SEC: float = 4.0  # ...adds bonus cooling
+const AMBIENT_WARM_PER_SEC: float = 1.0  # gentle drift back toward HEAT_START
+const IGNITE_HEAT_PULSE: float = 6.0  # heat added per manual ignite (percent points)
+const VENT_COOL_PER_SEC: float = 30.0 # extra cooling while venting
+
+var _heat: float = HEAT_START
 var heat: float:
 	get: return _heat
 	set(value):
 		var v: float = value
-		# If your sim uses 0–100, clamp to that; if 0–1, clamp accordingly.
 		if v > 1.0:
-			v = clamp(v, 0.0, 100.0)
+			v = clamp(v, 0.0, 100.0)  # model supports 0..100
 		else:
-			v = clamp(v, 0.0, 1.0)
+			v = clamp(v, 0.0, 1.0)    # also supports 0..1 (we'll emit 0..100 below)
+			v = v * 100.0
 		if not is_equal_approx(v, _heat):
 			_heat = v
 			heat_changed.emit(_heat)
 			if has_signal("state_changed"):
 				state_changed.emit()
+
+var sim_ready: bool = false
+var is_venting: bool = false  # keep if you already had it
+var _time_since_ignite: float = 0.0
+
+func add_heat_pulse(amount: float) -> void:
+	_time_since_ignite = 0.0
+	heat = heat + amount
 
 func set_heat(v: float) -> void:
 	heat = v
@@ -191,6 +218,26 @@ func set_heat(v: float) -> void:
 func add_heat(d: float) -> void:
 	heat = heat + d
 
+# Sweet-spot: 35–65% is optimal, outside it halves output/rate.
+func heat_rate_mult() -> float:
+	if _heat < 35.0 or _heat > 65.0:
+		return 0.5
+	return 1.0
+
+func start_venting(duration: float = 2.0) -> void:
+	if is_venting:
+		return
+	is_venting = true
+	vent_started.emit()
+
+	var t := Timer.new()
+	t.one_shot = true
+	t.wait_time = duration
+	add_child(t)
+	t.timeout.connect(func():
+		is_venting = false
+		vent_finished.emit()
+		t.queue_free())
 
 
 # ---- PROCESSES ----
@@ -200,6 +247,30 @@ func _process(delta: float) -> void:
 	while _accum >= STEP:
 		sim_tick(STEP)
 		_accum -= STEP
+	if not sim_ready:
+		return
+	_time_since_ignite += delta
+
+	# Passive cooling
+	var cool: float = BASE_COOL_PER_SEC
+	var fill: float = 0.0
+	if coolant_cap > 0.0:
+		fill = clamp(coolant / coolant_cap, 0.0, 1.0)
+	cool += COOLANT_COOL_FULL_PER_SEC * fill
+
+	# Idle bonus after a few seconds without ignitions
+	if _time_since_ignite >= IDLE_COOL_DELAY:
+		cool += IDLE_COOL_PER_SEC
+
+	# Venting bonus
+	if is_venting:
+		cool += VENT_COOL_PER_SEC
+
+	# Gentle drift back toward the ambient target (HEAT_START)
+	var warm: float = AMBIENT_WARM_PER_SEC * (HEAT_START - _heat)
+
+	var dheat: float = (warm - cool) * delta
+	heat = _heat + dheat
 
 func sim_tick(dt: float) -> void:
 	# --- pulsed production from pillars ---
