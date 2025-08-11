@@ -2,6 +2,7 @@
 extends Node
 
 # --- Core State ---
+# CURRENCY:
 var _eu: float = 0.0
 var eu: float:
 	get: return _eu
@@ -9,21 +10,22 @@ var eu: float:
 		if !is_equal_approx(value, _eu):
 			_eu = value
 			eu_changed.emit(_eu)
-
 var money: float = 0.0
-var fuel: float = 500.0
-var coolant: float = 500.0
 var flags: Dictionary = {"auto_sell_ratio": 0.01}
 
-var pillars: Array = []   # Array of Dictionary {"id":int, "level":int, "enabled":bool}
+const FUEL_TO_EU := 18.0
+const BASE_EU_S := 1.0
+const CLICK_BONUS := 2.0
+const PRICE_PER_10_EU := 1.0
 
+# RESEARCH
 var research_db: Dictionary = {}    # loaded JSON
 var research: Dictionary = {}       # key -> level (int)
 var research_levels: Dictionary = {}
-var fuel_cap: float = 1000.0
-var coolant_cap: float = 1000.0
 
-# --- Tunables (MVP placeholders) ---
+# PILLARS
+var pillars: Array = []   # Array of Dictionary {"id":int, "level":int, "enabled":bool}
+
 const NUM_PILLARS := 6
 const BASE_PILLAR_INTERVAL_S := 2.0      # default time between ignitions
 const MIN_PILLAR_INTERVAL_S  := 0.3      # clamp after research
@@ -32,18 +34,50 @@ const PILLAR_PULSE_HEAT      := 0.6      # Heat contribution per ignition
 const PILLAR_FUEL_PULSE      := 0.06     # Fuel burned per ignition
 const PILLAR_LEVEL_BONUS     := 0.20     # +20% Eu per level (same as before)
 
-const OVERHEAT := 100.0
-const COOLDOWN_OK := 80.0
-const BASE_EU_S := 1.0
-const CLICK_BONUS := 2.0
+
+var coolant_cap: float = 1000.0
+
+# FUEL
+var fuel_cap: float = 1000.0
+var _fuel: float = 0.0
+var fuel: float:
+	get: return _fuel
+	set(value):
+		var v: float = clamp(value, 0.0, fuel_cap)
+		if not is_equal_approx(v, _fuel):
+			_fuel = v
+			fuel_changed.emit(_fuel)
+			if has_signal("state_changed"): state_changed.emit()
+
 const FUEL_BURN_S := 0.05
-const FUEL_TO_EU := 18.0
+const FUEL_CAP     := 1000.0
+const FUEL_START_FRAC: float = 0.50
+const FUEL_PER_IGNITE: float = 1.0             # ml spent per manual ignite
+const FUEL_REFILL_PER_SEC: float = 0.0      # set >0 if you want passive refuel
+
+# COOLANT
+var _coolant: float = 0.0
+var coolant: float:
+	get: return _coolant
+	set(value):
+		var v: float = clamp(value, 0.0, coolant_cap)
+		if not is_equal_approx(v, _coolant):
+			_coolant = v
+			coolant_changed.emit(_coolant)
+			if has_signal("state_changed"): state_changed.emit()
+
+const COOLANT_START_FRAC: float = 0.50
+const COOLANT_USE_PER_SEC_BASE: float = 0.0     # baseline pump use
+const COOLANT_USE_PER_SEC_WHEN_COOLING: float = 2.0   # extra when heat > ambient
+const COOLANT_USE_PER_SEC_WHEN_VENT: float = 8.0      # extra while venting
+const COOLANT_REFILL_PER_SEC: float = 0.0       # set >0 for passive refill
+
+# HEAT
 const BASE_HEAT_S := 0.4
 const HEAT_FACTOR := 0.02
 const COOLANT_POWER := 0.6
-const PRICE_PER_10_EU := 1.0
-const FUEL_CAP     := 1000.0
-const COOLANT_CAP  := 1000.0
+const COOLANT_CAP  := 1000.0       
+
 # Fixed‑timestep accumulator (10 Hz)
 const STEP := 0.1
 var _accum := 0.0
@@ -57,6 +91,8 @@ signal eu_changed(value)
 signal heat_changed(value)
 signal vent_started
 signal vent_finished
+signal fuel_changed(value)
+signal coolant_changed(value)
 
 
 # ---- SPENDING TRACKER ----
@@ -91,14 +127,14 @@ func reset_state_defaults() -> void:
 	money = 0.0
 	fuel_cap = 100.0
 	coolant_cap = 100.0
-	fuel = 0.0
-	coolant = 0.0
-	heat = 0.0
+	fuel = fuel_cap * FUEL_START_FRAC
+	coolant = coolant_cap * COOLANT_START_FRAC
+	heat = HEAT_START
 	research_levels.clear()
 	ensure_pillars(PILLAR_COUNT)
 	state_changed.emit()
-	if has_signal("eu_changed"):
-		eu_changed.emit(eu)
+	if has_signal("eu_changed"): eu_changed.emit(eu)
+
 
 func _load_research() -> void:
 	var f = FileAccess.open("res://data/research.json", FileAccess.READ)
@@ -265,9 +301,25 @@ func _process(delta: float) -> void:
 	# Venting bonus
 	if is_venting:
 		cool += VENT_COOL_PER_SEC
+	
+	# Fuel: optional passive refill
+	if FUEL_REFILL_PER_SEC > 0.0 and _fuel < fuel_cap:
+		add_fuel(FUEL_REFILL_PER_SEC * delta)
 
+	# Coolant: baseline pump + extra when actually cooling, + big use while venting
+	var cool_use: float = COOLANT_USE_PER_SEC_BASE
+	if _heat > HEAT_START:
+		cool_use += COOLANT_USE_PER_SEC_WHEN_COOLING * ((_heat - HEAT_START) / 50.0)  # scale with how hot
+	if is_venting:
+		cool_use += COOLANT_USE_PER_SEC_WHEN_VENT
+	if cool_use > 0.0 and _coolant > 0.0:
+		add_coolant(-cool_use * delta)
 	# Gentle drift back toward the ambient target (HEAT_START)
 	var warm: float = AMBIENT_WARM_PER_SEC * (HEAT_START - _heat)
+	
+	# Optional passive refill if you want visible motion for now
+	if COOLANT_REFILL_PER_SEC > 0.0 and _coolant < coolant_cap and not is_venting:
+		add_coolant(COOLANT_REFILL_PER_SEC * delta)
 
 	var dheat: float = (warm - cool) * delta
 	heat = _heat + dheat

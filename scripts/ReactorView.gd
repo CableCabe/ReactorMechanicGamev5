@@ -49,6 +49,13 @@ func _ready() -> void:
 		coolant_bar.min_value = 0
 		coolant_bar.step = 1.0
 		coolant_bar.allow_greater = false
+		
+	if GameState.has_signal("fuel_changed"):
+		GameState.fuel_changed.connect(_on_fuel_changed)
+	if GameState.has_signal("coolant_changed"):
+		GameState.coolant_changed.connect(_on_coolant_changed)
+	_on_fuel_changed(GameState.fuel)
+	_on_coolant_changed(GameState.coolant)
 
 	_refresh()
 	
@@ -66,6 +73,20 @@ func _on_heat_changed(v: float) -> void:
 	if heat_bar:
 		heat_bar.value = hv
 		_tint_progress_bar(heat_bar, _color_by_pct(hp, true))
+
+func _on_fuel_changed(v: float) -> void:
+	if fuel_value: fuel_value.text = "%0.0f ml" % v
+	if fuel_bar:
+		fuel_bar.max_value = GameState.fuel_cap
+		fuel_bar.value = clamp(v, 0.0, GameState.fuel_cap)
+		_tint_progress_bar(fuel_bar, _color_by_pct(v / max(1.0, GameState.fuel_cap), false))
+
+func _on_coolant_changed(v: float) -> void:
+	if coolant_value: coolant_value.text = "%0.0f ml" % v
+	if coolant_bar:
+		coolant_bar.max_value = GameState.coolant_cap
+		coolant_bar.value = clamp(v, 0.0, GameState.coolant_cap)
+		_tint_progress_bar(coolant_bar, _color_by_pct(v / max(1.0, GameState.coolant_cap), false))
 
 func _process(delta: float) -> void:
 	_acc += delta

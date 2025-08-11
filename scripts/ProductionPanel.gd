@@ -30,7 +30,10 @@ func _ready() -> void:
 	_build_pillars()
 
 func _on_ignite() -> void:
-	GameState.add_eu(_ignite_delta())
+	GameState.add_fuel(-GameState.FUEL_PER_IGNITE)
+	var mult: float = GameState.heat_rate_mult()
+	GameState.add_eu(_ignite_delta() * mult)
+	GameState.add_heat_pulse(GameState.IGNITE_HEAT_PULSE)
 
 func _ignite_delta() -> float:
 	return ignite_base + float(ignite_level)
