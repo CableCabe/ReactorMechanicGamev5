@@ -295,6 +295,14 @@ func _on_vent_timeout() -> void:
 # ---- PROCESSES ----
 
 func _process(delta: float) -> void:
+	
+	# DEBUGGING
+	
+	if is_venting:
+		print("VENT TICK  step=", step, "  heat=", heat)
+	
+	
+	# MAIN
 	_accum += delta
 	while _accum >= STEP:
 		sim_tick(STEP)

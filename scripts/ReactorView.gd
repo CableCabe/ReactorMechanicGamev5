@@ -36,9 +36,6 @@ func _ready() -> void:
 		heat_bar.page = 0.0
 		heat_bar.allow_greater = false
 		heat_bar.allow_lesser = false
-	if GameState.has_signal("heat_changed"):
-		GameState.heat_changed.connect(_on_heat_changed)
-	_on_heat_changed(GameState.heat)
 
 	if fuel_bar:
 		fuel_bar.min_value = 0
@@ -54,6 +51,9 @@ func _ready() -> void:
 		GameState.fuel_changed.connect(_on_fuel_changed)
 	if GameState.has_signal("coolant_changed"):
 		GameState.coolant_changed.connect(_on_coolant_changed)
+	if GameState.has_signal("heat_changed"):
+		GameState.heat_changed.connect(_on_heat_changed)
+	_on_heat_changed(GameState.heat)
 	_on_fuel_changed(GameState.fuel)
 	_on_coolant_changed(GameState.coolant)
 
@@ -61,6 +61,8 @@ func _ready() -> void:
 	
 var _dbg_left := 10
 func _on_heat_changed(v: float) -> void:
+	print("UI HEAT -> ", v)
+	
 	var hp: float
 	if _dbg_left > 0:
 		_dbg_left -= 1
