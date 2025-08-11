@@ -74,7 +74,7 @@ func _refresh_buttons() -> void:
 			vent_btn.text = "VENT"
 
 func _on_vent() -> void:
-	GameState.start_venting(2.0)
+	GameState.start_venting(3.0)
 	# UI will also get a vent_started signal, but disable immediately for snappy feedback
 	vent_btn.disabled = true
 

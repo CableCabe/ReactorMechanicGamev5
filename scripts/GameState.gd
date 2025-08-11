@@ -34,9 +34,6 @@ const PILLAR_PULSE_HEAT      := 0.6      # Heat contribution per ignition
 const PILLAR_FUEL_PULSE      := 0.06     # Fuel burned per ignition
 const PILLAR_LEVEL_BONUS     := 0.20     # +20% Eu per level (same as before)
 
-
-var coolant_cap: float = 1000.0
-
 # FUEL
 var fuel_cap: float = 1000.0
 var _fuel: float = 0.0
@@ -57,6 +54,7 @@ const FUEL_PER_IGNITE: float = 1.0             # ml spent per manual ignite
 const FUEL_REFILL_PER_SEC: float = 0.0      # set >0 if you want passive refuel
 
 # COOLANT
+var coolant_cap: float = 1000.0
 var _coolant: float = 0.0
 var coolant: float:
 	get: return _coolant
@@ -86,10 +84,15 @@ const IDLE_COOL_DELAY: float = 3.0
 const IDLE_COOL_PER_SEC: float = 4.0
 const AMBIENT_WARM_PER_SEC: float = 1.0
 const IGNITE_HEAT_PULSE: float = 1.8
-const VENT_COOL_PER_SEC: float = 50.0
+
+# VENTING
+const VENT_COOL_PER_SEC: float = 6.5
+const VENT_DURATION_SEC: float = 3.0
+const VENT_DROP_TOTAL: float = 18.0
 
 var is_venting: bool = false
 var _vent_timer: Timer
+var _vent_cool_remaining: float = 0.0
 
 # Fixed‑timestep accumulator (10 Hz)
 const STEP := 0.1
@@ -268,10 +271,15 @@ func heat_rate_mult() -> float:
 		return 0.5
 	return 1.0
 
-func start_venting(duration: float = 2.0) -> void:
+
+
+# ---- VENTING ----
+
+func start_venting(duration: float = VENT_DURATION_SEC) -> void:
 	if is_venting:
 		return
 	is_venting = true
+	_vent_cool_remaining = VENT_DROP_TOTAL
 	vent_started.emit()
 	_vent_timer.stop()
 	_vent_timer.wait_time = duration
@@ -279,7 +287,9 @@ func start_venting(duration: float = 2.0) -> void:
 
 func _on_vent_timeout() -> void:
 	is_venting = false
+	_vent_cool_remaining = 0.0
 	vent_finished.emit()
+
 
 
 # ---- PROCESSES ----
@@ -294,6 +304,10 @@ func _process(delta: float) -> void:
 
 	# Passive cooling
 	var cool: float = BASE_COOL_PER_SEC
+	if _time_since_ignite >= IDLE_COOL_DELAY:
+		cool += IDLE_COOL_PER_SEC
+	if is_venting:
+		cool += VENT_COOL_PER_SEC
 	var fill: float = 0.0
 	if coolant_cap > 0.0:
 		fill = clamp(coolant / coolant_cap, 0.0, 1.0)
@@ -305,7 +319,14 @@ func _process(delta: float) -> void:
 
 	# Venting bonus
 	if is_venting:
-		cool += VENT_COOL_PER_SEC
+		# deterministic drop: ~VENT_DROP_TOTAL over VENT_DURATION_SEC
+		var vent_rate: float = VENT_DROP_TOTAL / max(VENT_DURATION_SEC, 0.001)
+		var step: float = vent_rate * delta
+		if step > _vent_cool_remaining:
+			step = _vent_cool_remaining
+		_vent_cool_remaining -= step
+		set_heat(_heat - step)
+		return   # skip normal warm/cool while venting
 	
 	# Fuel: optional passive refill
 	if FUEL_REFILL_PER_SEC > 0.0 and _fuel < fuel_cap:
@@ -313,14 +334,18 @@ func _process(delta: float) -> void:
 
 	# Coolant: baseline pump + extra when actually cooling, + big use while venting
 	var cool_use: float = COOLANT_USE_PER_SEC_BASE
+	var warm: float = AMBIENT_WARM_PER_SEC * (HEAT_START - _heat)
+	
 	if _heat > HEAT_START:
 		cool_use += COOLANT_USE_PER_SEC_WHEN_COOLING * ((_heat - HEAT_START) / 50.0)  # scales with how hot
 	if is_venting:
 		cool_use += COOLANT_USE_PER_SEC_WHEN_VENT
 	if cool_use > 0.0 and _coolant > 0.0:
 		add_coolant(-cool_use * delta)  # note the minus: using coolant	
+
 	# Gentle drift back toward the ambient target (HEAT_START)
-	var warm: float = AMBIENT_WARM_PER_SEC * (HEAT_START - _heat)
+	if is_venting:
+		warm = 0.0   # don't fight the vent
 	
 	# Optional passive refill if you want visible motion for now
 	if COOLANT_REFILL_PER_SEC > 0.0 and _coolant < coolant_cap and not is_venting:
