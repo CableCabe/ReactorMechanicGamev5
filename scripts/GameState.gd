@@ -2,6 +2,13 @@
 extends Node
 
 # --- Core State ---
+
+# DEBUG
+
+const MKT_DEBUG: bool = true
+var _eu_prev: float = 0.0
+var _eu_leak_logs_left: int = 20
+
 # CURRENCY:
 var _eu: float = 0.0
 var eu: float:
@@ -140,15 +147,8 @@ signal pillar_fired(idx: int)
 signal money_changed(value)
 
 
-# ---- SPENDING TRACKER ----
-func add_eu(a: float) -> void:
-	eu = eu + a
+# ---- DEBUG ----
 
-func spend_eu(a: float) -> bool:
-	if _eu >= a:
-		eu = _eu - a
-		return true
-	return false
 
 
 
@@ -473,18 +473,36 @@ func sim_tick(dt: float) -> void:
 	if coolant_flow > 0.0:
 		coolant = max(0.0, coolant - 0.2 * dt)
 
-	# auto-sell
-	var sell_eu: float = eu * float(flags.get("auto_sell_ratio", 0.0))
-	if sell_eu > 0.0:
-		eu -= sell_eu
-		money += (sell_eu / 10.0) * current_price()
-		
-
 	emit_signal("state_changed")
 	
+# DEBUG
+
+	if not market_auto_sell and _count_enabled_pillars() == 0:
+		if eu < _eu_prev - 0.01 and _eu_leak_logs_left > 0:
+			print("EU LEAK: Δ=", eu - _eu_prev, " heat=", heat, " money=", money)
+			_eu_leak_logs_left -= 1
+	_eu_prev = eu	
+	
+func _count_enabled_pillars() -> int:
+	var c: int = 0
+	for p in pillars:
+		if bool(p.get("unlocked", false)) and bool(p.get("enabled", true)):
+			c += 1
+	return c
+
+
 
 
 #  ---- ECONOMY STUFF ----
+
+func add_eu(a: float) -> void:
+	eu = eu + a
+
+func spend_eu(a: float) -> bool:
+	if _eu >= a:
+		eu = _eu - a
+		return true
+	return false
 
 func current_price() -> float:
 	var price_mult := 1.0 + float(research.get("market_i", 0)) * 0.05
@@ -524,15 +542,24 @@ func spend_money(cost: float) -> bool:
 
 func set_market_auto_sell(on: bool) -> void:
 	market_auto_sell = on
+	if MKT_DEBUG:
+		print("AUTO-SELL -> ", market_auto_sell)
 
-func sell_eu(amount: float) -> float:
+func sell_eu(amount: float, force: bool = false) -> float:
+	if not force and not market_auto_sell:
+		if MKT_DEBUG:
+			print("sell_eu ignored (auto-sell OFF), amount=", amount)
+		return 0.0
+
 	var a: float = clamp(amount, 0.0, eu)
 	if a <= 0.0:
 		return 0.0
-	eu = eu - a
+	eu -= a
 	eu_changed.emit(eu)
 	var earned: float = a * SELL_EU_RATE
 	add_money(earned)
+	if MKT_DEBUG:
+		print("SOLD ", a, " Eu -> $", earned, " (eu now ", eu, ")")
 	return earned
 
 func _on_market_timeout() -> void:
@@ -540,7 +567,10 @@ func _on_market_timeout() -> void:
 		return
 	var dt: float = _market_timer.wait_time
 	var to_sell: float = AUTO_SELL_RATE_EU_PER_SEC * dt
-	sell_eu(to_sell)
+	if MKT_DEBUG:
+		print("AUTO-SELL tick -> request ", to_sell, " Eu")
+	sell_eu(to_sell)   # flag-gated by sell_eu itself
+
 
 func market_fuel_price() -> float:
 	return MKT_FUEL_PACK_BASE_COST * pow(1.15, float(_market_fuel_buys))

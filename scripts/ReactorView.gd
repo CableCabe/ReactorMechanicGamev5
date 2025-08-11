@@ -61,12 +61,12 @@ func _ready() -> void:
 	
 var _dbg_left := 10
 func _on_heat_changed(v: float) -> void:
-	print("UI HEAT -> ", v)
+	# print("UI HEAT -> ", v)
 	
 	var hp: float
 	if _dbg_left > 0:
 		_dbg_left -= 1
-		print("heat_changed -> ", v)
+		# print("heat_changed -> ", v)
 	if v > 1.0:
 		hp = clamp(v / 100.0, 0.0, 1.0)
 	else:
