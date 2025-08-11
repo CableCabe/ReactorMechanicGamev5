@@ -88,6 +88,9 @@ const AMBIENT_WARM_PER_SEC: float = 1.0
 const IGNITE_HEAT_PULSE: float = 1.8
 const VENT_COOL_PER_SEC: float = 50.0
 
+var is_venting: bool = false
+var _vent_timer: Timer
+
 # Fixed‑timestep accumulator (10 Hz)
 const STEP := 0.1
 var _accum := 0.0
@@ -131,6 +134,10 @@ func _enter_tree() -> void:
 	t.timeout.connect(func():
 		sim_ready = true
 		t.queue_free())
+	_vent_timer = Timer.new()
+	_vent_timer.one_shot = true
+	add_child(_vent_timer)
+	_vent_timer.timeout.connect(_on_vent_timeout)
 	
 func reset_state_defaults() -> void:
 	eu = 0.0
@@ -243,7 +250,6 @@ var heat: float:
 				state_changed.emit()
 
 var sim_ready: bool = false
-var is_venting: bool = false  # keep if you already had it
 
 func add_heat_pulse(amount: float) -> void:
 	var k: float = 0.5 + min(_time_since_ignite, 1.0) * 0.5
@@ -267,15 +273,13 @@ func start_venting(duration: float = 2.0) -> void:
 		return
 	is_venting = true
 	vent_started.emit()
+	_vent_timer.stop()
+	_vent_timer.wait_time = duration
+	_vent_timer.start()
 
-	var t := Timer.new()
-	t.one_shot = true
-	t.wait_time = duration
-	add_child(t)
-	t.timeout.connect(func():
-		is_venting = false
-		vent_finished.emit()
-		t.queue_free())
+func _on_vent_timeout() -> void:
+	is_venting = false
+	vent_finished.emit()
 
 
 # ---- PROCESSES ----
