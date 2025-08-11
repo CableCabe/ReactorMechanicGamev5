@@ -94,7 +94,7 @@ const COOLANT_COOL_FULL_PER_SEC: float = 8.0
 const IDLE_COOL_DELAY: float = 3.0
 const IDLE_COOL_PER_SEC: float = 4.0
 const AMBIENT_WARM_PER_SEC: float = 1.0
-const IGNITE_HEAT_PULSE: float = 1.8
+const IGNITE_HEAT_PULSE: float = 0.3
 
 # VENTING
 const VENT_COOL_PER_SEC: float = 6.5
