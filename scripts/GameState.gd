@@ -547,12 +547,7 @@ func _count_enabled_pillars() -> int:
 func add_eu(amount: float, reason: String = "") -> void:
 	if amount == 0.0:
 		return
-	# TEMP: see who’s doing this
-	print("[EU+] +", amount, " reason=", reason, " vent=", is_venting)
-	# Uncomment once to see the exact call path:
-	# print_stack()
-
-	# Hard block pillar-produced EU during vent (see step B)
+	
 	if is_venting and (_in_pillar_tick or reason.begins_with("pillar")):
 		return
 

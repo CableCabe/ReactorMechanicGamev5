@@ -9,7 +9,7 @@ extends Control
 @onready var up_btn: Button     = $Row/UpgradeBtn
 @onready var unlock_btn: Button = $Row/UnlockBtn
 @onready var pulse_label: Label = $Row/PulseLabel     
-@onready var flash: ColorRect   = $Row/Flash 
+@onready var flash: ColorRect   = $Flash 
 @export var fuel_per_pulse: float = 1.0
 @export var pulse_eu: float = 2.0
 @export var pulse_interval: float = 1.0
@@ -36,6 +36,10 @@ func _ready() -> void:
 	toggle.toggled.connect(_on_toggle)
 	up_btn.pressed.connect(_on_upgrade)
 	unlock_btn.pressed.connect(_on_unlock)
+	
+	flash.modulate.a = 0.0
+	flash.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	flash.z_index = 100
 
 	if GS.has_signal("state_changed"):
 		GS.connect("state_changed", Callable(self, "_refresh"))
@@ -116,13 +120,10 @@ func _on_pillar_fired(i: int, _payload: Variant = null) -> void:
 		emit_signal("show_no_fuel_flag")
 		return
 	# quick flash
-	if _tween and _tween.is_running():
-		_tween.kill()
+	if _tween and _tween.is_running(): _tween.kill()
 	flash.modulate.a = 0.8
-	flash.visible = true
 	_tween = create_tween()
 	_tween.tween_property(flash, "modulate:a", 0.0, 0.15)
-	_tween.tween_callback(Callable(self, "_hide_flash"))
 
 func _hide_flash() -> void:
 	flash.visible = false
