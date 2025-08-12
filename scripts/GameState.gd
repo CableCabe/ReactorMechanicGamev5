@@ -102,14 +102,14 @@ const IGNITE_HEAT_PULSE: float = 0.3
 # VENTING
 const VENT_COOL_PER_SEC: float = 6.5
 const VENT_DURATION_SEC: float = 3.0
-const VENT_DROP_TOTAL: float = 18.0
+const VENT_DROP_TOTAL: float = 14.0
 
 var is_venting: bool = false
 var _vent_timer: Timer
 var _vent_cool_remaining: float = 0.0
 var _vent_rate: float = 0.0                 # % points per second during vent
 
-@export var vent_duration: float = 4.0
+@export var vent_duration: float = 2.0
 
 # Fixed‑timestep accumulator (10 Hz)
 const STEP := 0.1
@@ -161,7 +161,7 @@ signal pillar_no_fuel(pillar_path: NodePath)
 
 # ---- READY ----
 func _ready() -> void:
-	# Create a private timer that cannot autostart accidentally
+	# Create a private, non-autostart timer so nothing fires early
 	_vent_timer = Timer.new()
 	_vent_timer.name = "VentTimerPriv"
 	_vent_timer.one_shot = true

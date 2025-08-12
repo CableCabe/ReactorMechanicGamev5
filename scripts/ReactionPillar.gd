@@ -13,6 +13,11 @@ extends Control
 @export var fuel_per_pulse: float = 1.0
 @export var pulse_eu: float = 2.0
 @export var pulse_interval: float = 1.0
+@onready var GS: Node = (
+	get_tree().root.get_node_or_null("GS") 
+	if get_tree().root.has_node("GS") 
+	else get_tree().root.get_node_or_null("GameState")
+)
 
 var _tween: Tween
 var _active: bool = false
@@ -23,31 +28,30 @@ signal show_no_fuel_flag
 signal hide_no_fuel_flag
 
 func _ready() -> void:
-	custom_minimum_size.y = max(32.0, $Row.get_combined_minimum_size().y)
-	name_label.text = "Pillar %d" % (idx + 1)
-	toggle.toggled.connect(_on_toggle)
-	up_btn.pressed.connect(_on_upgrade)
-	unlock_btn.pressed.connect(_on_unlock)
-	GameState.state_changed.connect(_refresh)
-	GameState.pillar_fired.connect(_on_pillar_fired)
-	_refresh()
-	_pulse_timer = Timer.new()
-	_pulse_timer.wait_time = pulse_interval
-	_pulse_timer.autostart = false
-	add_child(_pulse_timer)
-	_pulse_timer.timeout.connect(_on_pulse)
+	# ...your existing UI hookups...
+	if GS == null:
+		push_error("ReactionPillar: no '/root/GS' or '/root/GameState' autoload found.")
+		return
 
-	if GameState.has_signal("venting_started"):
-		GameState.connect("venting_started", Callable(self, "_on_vent_start"))
-	if GameState.has_signal("venting_finished"):
-		GameState.connect("venting_finished", Callable(self, "_on_vent_end"))
-	if GameState.has_signal("pillar_no_fuel"):
-		GameState.connect("pillar_no_fuel", Callable(self, "_on_pillar_no_fuel"))
-	
+	if GS.has_signal("state_changed"):
+		GS.connect("state_changed", Callable(self, "_refresh"))
+
+	# IMPORTANT: connect here (not inside the handler) and bind this pillar’s index
+	if GS.has_signal("pillar_fired"):
+		GS.connect("pillar_fired", Callable(self, "_on_pillar_fired").bind(idx))
+
+	if GS.has_signal("venting_started"):
+		GS.connect("venting_started", Callable(self, "_on_vent_start"))
+	if GS.has_signal("venting_finished"):
+		GS.connect("venting_finished", Callable(self, "_on_vent_end"))
+	if GS.has_signal("pillar_no_fuel"):
+		GS.connect("pillar_no_fuel", Callable(self, "_on_pillar_no_fuel"))
+
 	add_to_group("reaction_pillars")
 
+
 func _refresh() -> void:
-	var p: Dictionary = GameState.get_pillar(idx)
+	var p: Dictionary = GS.get_pillar(idx)
 	var is_unlocked: bool = bool(p.get("unlocked", false))
 
 	toggle.visible = is_unlocked
@@ -58,15 +62,15 @@ func _refresh() -> void:
 		level_label.text = "Lv. %d" % int(p.get("level", 0))
 		toggle.button_pressed = bool(p.get("enabled", false))
 
-		var cost: Dictionary = GameState.pillar_upgrade_cost(int(p.get("level", 0)))
+		var cost: Dictionary = GS.pillar_upgrade_cost(int(p.get("level", 0)))
 		up_btn.text = "Upgrade (Eu %.0f)" % float(cost.get("eu", 0.0))
-		up_btn.disabled = not GameState.can_afford(cost)
+		up_btn.disabled = not GS.can_afford(cost)
 
 		# NEW: per-pulse readout
-		var pulse := GameState.pillar_pulse_eu(idx)
+		var pulse : float = GS.pillar_pulse_eu(idx)
 		pulse_label.text = "+%.2f Eu | " % pulse
 	else:
-		var uc: Dictionary = GameState.unlock_cost(idx)
+		var uc: Dictionary = GS.unlock_cost(idx)
 		unlock_btn.text = "Unlock (Eu %.0f)" % float(uc.get("eu", 0.0))
  
 func set_pillar_index(i: int) -> void:
@@ -74,26 +78,24 @@ func set_pillar_index(i: int) -> void:
 	_refresh()
 
 func _on_toggle(on: bool) -> void:
-	GameState.set_pillar_enabled(idx, on)
+	GS.set_pillar_enabled(idx, on)
 	_refresh()
 
 func _on_upgrade() -> void:
-	GameState.upgrade_pillar(idx)
+	GS.upgrade_pillar(idx)
 
 func _on_unlock() -> void:
-	GameState.unlock_pillar(idx)
+	GS.unlock_pillar(idx)
 
-func _on_pillar_fired(fired_idx: int) -> void:
-	 if not _active:
-		return
-	if GameState.is_venting:
-		return
-	if not GameState.consume_fuel(fuel_per_pulse, self):
+func _on_pillar_fired(i: int, payload: Variant = null) -> void:
+	if i != idx: return
+	if not _active: return
+	if GS.is_venting: return
+
+	# Per-pulse fuel consumption; shut down on empty
+	if not GS.consume_fuel(fuel_per_pulse, self):
 		turn_off()
 		emit_signal("show_no_fuel_flag")
-		return
-	
-	if fired_idx != idx:
 		return
 	# quick flash
 	if _tween and _tween.is_running():
@@ -124,10 +126,10 @@ func turn_off() -> void:
 func _update_timer() -> void:
 	if _active == false:
 		return
-	if GameState.is_venting:
+	if GS.is_venting:
 		_pulse_timer.stop()
 		return
-	if GameState.auto_ignite_enabled:
+	if GS.auto_ignite_enabled:
 		_pulse_timer.start()
 	else:
 		_pulse_timer.stop()
@@ -141,21 +143,21 @@ func _on_vent_end() -> void:
 func manual_ignite() -> void:
 	if _active == false:
 		return
-	if GameState.is_venting:
+	if GS.is_venting:
 		return
-	if GameState.manual_ignite_enabled:
+	if GS.manual_ignite_enabled:
 		_on_pulse()
 
 func _on_pulse() -> void:
-	if GameState.is_venting:
+	if GS.is_venting:
 		return
-	var ok := GameState.consume_fuel(fuel_per_pulse, self)
+	var ok : bool = GS.consume_fuel(fuel_per_pulse, self)
 	if ok == false:
 		turn_off()
 		emit_signal("show_no_fuel_flag")
 		return
 	# Successful pulse → integrate with your EU/heat logic here
-	# Example: GameState.add_eu(pulse_eu)
+	# Example: GS.add_eu(pulse_eu)
 	emit_signal("hide_no_fuel_flag")
 
 func _on_pillar_no_fuel(path: NodePath) -> void:

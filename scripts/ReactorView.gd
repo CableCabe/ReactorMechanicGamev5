@@ -21,6 +21,7 @@ extends PanelContainer
 @onready var heat_bar: ProgressBar    = %HeatBar
 
 @onready var warnings: WarningsPanel = %WarningsPanel
+@onready var GS = get_node("/root/GameState")
 
 # Thresholds: green for 25–100%, yellow for 10–25%, red for <10%
 const GREEN_MIN := 0.25
@@ -49,15 +50,15 @@ func _ready() -> void:
 		coolant_bar.step = 1.0
 		coolant_bar.allow_greater = false
 		
-	if GameState.has_signal("fuel_changed"):
-		GameState.fuel_changed.connect(_on_fuel_changed)
-	if GameState.has_signal("coolant_changed"):
-		GameState.coolant_changed.connect(_on_coolant_changed)
-	if GameState.has_signal("heat_changed"):
-		GameState.heat_changed.connect(_on_heat_changed)
-	_on_heat_changed(GameState.heat)
-	_on_fuel_changed(GameState.fuel)
-	_on_coolant_changed(GameState.coolant)
+	if GS.has_signal("fuel_changed"):
+		GS.fuel_changed.connect(_on_fuel_changed)
+	if GS.has_signal("coolant_changed"):
+		GS.coolant_changed.connect(_on_coolant_changed)
+	if GS.has_signal("heat_changed"):
+		GS.heat_changed.connect(_on_heat_changed)
+	_on_heat_changed(GS.heat)
+	_on_fuel_changed(GS.fuel)
+	_on_coolant_changed(GS.coolant)
 
 	_refresh()
 	
@@ -108,16 +109,16 @@ func _on_heat_changed(v: float) -> void:
 func _on_fuel_changed(v: float) -> void:
 	if fuel_value: fuel_value.text = "%0.0f ml" % v
 	if fuel_bar:
-		fuel_bar.max_value = GameState.fuel_cap
-		fuel_bar.value = clamp(v, 0.0, GameState.fuel_cap)
-		_tint_progress_bar(fuel_bar, _color_by_pct(v / max(1.0, GameState.fuel_cap), false))
+		fuel_bar.max_value = GS.fuel_cap
+		fuel_bar.value = clamp(v, 0.0, GS.fuel_cap)
+		_tint_progress_bar(fuel_bar, _color_by_pct(v / max(1.0, GS.fuel_cap), false))
 
 func _on_coolant_changed(v: float) -> void:
 	if coolant_value: coolant_value.text = "%0.0f ml" % v
 	if coolant_bar:
-		coolant_bar.max_value = GameState.coolant_cap
-		coolant_bar.value = clamp(v, 0.0, GameState.coolant_cap)
-		_tint_progress_bar(coolant_bar, _color_by_pct(v / max(1.0, GameState.coolant_cap), false))
+		coolant_bar.max_value = GS.coolant_cap
+		coolant_bar.value = clamp(v, 0.0, GS.coolant_cap)
+		_tint_progress_bar(coolant_bar, _color_by_pct(v / max(1.0, GS.coolant_cap), false))
 
 func _process(delta: float) -> void:
 	_acc += delta
@@ -127,17 +128,17 @@ func _process(delta: float) -> void:
 
 func _refresh() -> void:
 	var fuel_cap: float = 100.0
-	if "fuel_cap" in GameState:
-		fuel_cap = float(GameState.fuel_cap)
+	if "fuel_cap" in GS:
+		fuel_cap = float(GS.fuel_cap)
 	var coolant_cap: float = 100.0
-	if "coolant_cap" in GameState:
-		coolant_cap = float(GameState.coolant_cap)
+	if "coolant_cap" in GS:
+		coolant_cap = float(GS.coolant_cap)
 
 	# numbers
 	if fuel_value:
-		fuel_value.text = "%0.0f ml" % GameState.fuel
+		fuel_value.text = "%0.0f ml" % GS.fuel
 	if coolant_value:
-		coolant_value.text = "%0.0f ml" % GameState.coolant
+		coolant_value.text = "%0.0f ml" % GS.coolant
 	if heat_value:
 		var hp: float = _heat_pct()
 		heat_value.text = "%d%%" % int(round(hp * 100.0))
@@ -145,12 +146,12 @@ func _refresh() -> void:
 	# bars
 	if fuel_bar:
 		fuel_bar.max_value = fuel_cap
-		fuel_bar.value = clamp(GameState.fuel, 0.0, fuel_cap)
-		_tint_progress_bar(fuel_bar, _color_by_pct(GameState.fuel / max(1.0, fuel_cap), false))
+		fuel_bar.value = clamp(GS.fuel, 0.0, fuel_cap)
+		_tint_progress_bar(fuel_bar, _color_by_pct(GS.fuel / max(1.0, fuel_cap), false))
 	if coolant_bar:
 		coolant_bar.max_value = coolant_cap
-		coolant_bar.value = clamp(GameState.coolant, 0.0, coolant_cap)
-		_tint_progress_bar(coolant_bar, _color_by_pct(GameState.coolant / max(1.0, coolant_cap), false))
+		coolant_bar.value = clamp(GS.coolant, 0.0, coolant_cap)
+		_tint_progress_bar(coolant_bar, _color_by_pct(GS.coolant / max(1.0, coolant_cap), false))
 	var hp: float = _heat_pct()
 	var hv: int = int(round(hp * 100.0))
 	if heat_bar:
@@ -159,8 +160,8 @@ func _refresh() -> void:
 
 # --- helpers ---
 func _heat_pct() -> float:
-	if "heat" in GameState:
-		var h: float = float(GameState.heat)
+	if "heat" in GS:
+		var h: float = float(GS.heat)
 		if h > 1.0:
 			return clamp(h / 100.0, 0.0, 1.0)
 		return clamp(h, 0.0, 1.0)

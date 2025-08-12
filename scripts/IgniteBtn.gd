@@ -1,20 +1,22 @@
 extends Button
 
+@onready var GS = get_node("/root/GameState")
+
 func _ready() -> void:
-	if GameState.has_signal("venting_started"):
-		GameState.connect("venting_started", _lock)
-	if GameState.has_signal("venting_finished"):
-		GameState.connect("venting_finished", _unlock)
-	if GameState.has_signal("venting_ended"): # temporary alias
-		GameState.connect("venting_ended", _unlock)
+	if GS.has_signal("venting_started"):
+		GS.connect("venting_started", _lock)
+	if GS.has_signal("venting_finished"):
+		GS.connect("venting_finished", _unlock)
+	if GS.has_signal("venting_ended"): # temporary alias
+		GS.connect("venting_ended", _unlock)
 	_sync_from_state()
 
 func _pressed() -> void:
-	if GameState.is_venting: return
-	if not GameState.manual_ignite_enabled: return
+	if GS.is_venting: return
+	if not GS.manual_ignite_enabled: return
 	get_tree().call_group("reaction_pillars", "manual_ignite")
 
 func _lock() -> void: disabled = true
 func _unlock() -> void: _sync_from_state()
 func _sync_from_state() -> void:
-	disabled = GameState.is_venting or (not GameState.manual_ignite_enabled)
+	disabled = GS.is_venting or (not GS.manual_ignite_enabled)

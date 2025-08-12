@@ -100,38 +100,43 @@ func set_status_and_log(key: String, status_text: String, severity: String = "wa
 
 # --- Built-in wiring for heat+fuel; cooling is external ---
 func hook_standard_events() -> void:
-	# Be robust: only connect if the signal exists on GameState.
-	if GameState.has_signal("venting_started"):
-		GameState.venting_started.connect(func():
+	# Be robust: only connect if the signal exists on GS.
+	var GS = get_tree().root.get_node_or_null("GameState")
+	if GS == null:
+		push_error("WarningsPanel: '/root/GameState' not found (check Project Settings → AutoLoad).")
+		return
+	
+	if GS.has_signal("venting_started"):
+		GS.venting_started.connect(func():
 			set_light("heat", true)
 			add_message("heat", "Venting heat…", "info")
 		)
 	else:
-		push_warning("WarningsPanel: GameState missing signal 'venting_started' — HEAT light will only update on finish.")
+		push_warning("WarningsPanel: GS missing signal 'venting_started' — HEAT light will only update on finish.")
 
-	if GameState.has_signal("venting_finished"):
-		GameState.venting_finished.connect(func():
+	if GS.has_signal("venting_finished"):
+		GS.venting_finished.connect(func():
 			set_light("heat", false)
 			add_message("heat", "Venting complete.", "info")
 		)
 	else:
-		push_warning("WarningsPanel: GameState missing signal 'venting_finished'.")
+		push_warning("WarningsPanel: GS missing signal 'venting_finished'.")
 
-	if GameState.has_signal("fuel_empty"):
-		GameState.fuel_empty.connect(func():
+	if GS.has_signal("fuel_empty"):
+		GS.fuel_empty.connect(func():
 			set_light("fuel", true)
 			add_message("fuel", "Fuel depleted.", "error")
 		)
 	else:
-		push_warning("WarningsPanel: GameState missing signal 'fuel_empty'.")
+		push_warning("WarningsPanel: GS missing signal 'fuel_empty'.")
 
-	if GameState.has_signal("fuel_changed"):
-		GameState.fuel_changed.connect(func(_f: float):
-			if GameState.fuel > 0.0:
+	if GS.has_signal("fuel_changed"):
+		GS.fuel_changed.connect(func(_f: float):
+			if GS.fuel > 0.0:
 				set_light("fuel", false)
 		)
 	else:
-		push_warning("WarningsPanel: GameState missing signal 'fuel_changed'.")
+		push_warning("WarningsPanel: GS missing signal 'fuel_changed'.")
 
 # External API for cooling warnings (call from your cooling logic)
 func set_cooling_warning(on: bool, text: String, severity: String = "warn") -> void:
