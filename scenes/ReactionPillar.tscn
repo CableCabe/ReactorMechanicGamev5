@@ -13,23 +13,18 @@ size_flags_horizontal = 3
 size_flags_vertical = 3
 script = ExtResource("1_xnyvk")
 
-[node name="Flash" type="ColorRect" parent="."]
-visible = false
-z_index = 10
-custom_minimum_size = Vector2(29.62, 0)
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-color = Color(0, 0.611765, 0.972549, 1)
-
 [node name="Row" type="HBoxContainer" parent="."]
 layout_mode = 0
 offset_right = 267.0
 offset_bottom = 31.0
+
+[node name="Flash" type="ColorRect" parent="Row"]
+visible = false
+z_index = 10
+custom_minimum_size = Vector2(29.62, 0)
+layout_mode = 2
+mouse_filter = 2
+color = Color(0, 0.611765, 0.972549, 1)
 
 [node name="PulseLabel" type="Label" parent="Row"]
 layout_mode = 2

@@ -802,7 +802,12 @@ func reset_save() -> void:
 func ensure_pillars(n: int) -> void:
 	while pillars.size() < n:
 		var i: int = pillars.size()
-		pillars.append({"unlocked": i == 0, "level": 1, "enabled": true})
+		pillars.append({
+			"unlocked": i == 0,
+			"level": 1,
+			"enabled": false,   # ← was true; start OFF so UI and model agree
+			"timer": 0.0
+		})
 	while _pillar_accum.size() < n:
 		_pillar_accum.append(0.0)
 

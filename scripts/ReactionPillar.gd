@@ -9,7 +9,7 @@ extends Control
 @onready var up_btn: Button     = $Row/UpgradeBtn
 @onready var unlock_btn: Button = $Row/UnlockBtn
 @onready var pulse_label: Label = $Row/PulseLabel     
-@onready var flash: ColorRect   = $Flash 
+@onready var flash: ColorRect   = $Row/Flash 
 @export var fuel_per_pulse: float = 1.0
 @export var pulse_eu: float = 2.0
 @export var pulse_interval: float = 1.0
@@ -32,6 +32,10 @@ func _ready() -> void:
 	if GS == null:
 		push_error("ReactionPillar: no '/root/GS' or '/root/GameState' autoload found.")
 		return
+	
+	toggle.toggled.connect(_on_toggle)
+	up_btn.pressed.connect(_on_upgrade)
+	unlock_btn.pressed.connect(_on_unlock)
 
 	if GS.has_signal("state_changed"):
 		GS.connect("state_changed", Callable(self, "_refresh"))
@@ -47,12 +51,23 @@ func _ready() -> void:
 		GS.connect("pillar_no_fuel", Callable(self, "_on_pillar_no_fuel"))
 
 	add_to_group("reaction_pillars")
-
+	
+	_refresh()  # initial sync
+	
+	# Future timer
+	
+#	_pulse_timer = Timer.new()
+#	_pulse_timer.autostart = false
+#	_pulse_timer.one_shot = false
+#	_pulse_timer.wait_time = pulse_interval
+#	add_child(_pulse_timer)
+#	_pulse_timer.timeout.connect(_on_pulse)
 
 func _refresh() -> void:
 	var p: Dictionary = GS.get_pillar(idx)
 	var is_unlocked: bool = bool(p.get("unlocked", false))
-
+	var is_enabled  := bool(p.get("enabled", false))
+	
 	toggle.visible = is_unlocked
 	up_btn.visible = is_unlocked
 	unlock_btn.visible = not is_unlocked
@@ -64,12 +79,12 @@ func _refresh() -> void:
 		up_btn.text = "Upgrade (Eu %.0f)" % float(cost.get("eu", 0.0))
 		up_btn.disabled = not GS.can_afford(cost)
 
-		# NEW: per-pulse readout
-#		var pulse : float = GS.pillar_pulse_eu(idx)
-#		pulse_label.text = "+%.2f Eu | " % pulse
+	toggle.set_pressed_no_signal(is_enabled)
+	
+	if is_unlocked and is_enabled:
+		if not _active: turn_on()
 	else:
-		var uc: Dictionary = GS.unlock_cost(idx)
-		unlock_btn.text = "Unlock (Eu %.0f)" % float(uc.get("eu", 0.0))
+		if _active: turn_off()
  
 func set_pillar_index(i: int) -> void:
 	idx = i
@@ -120,14 +135,14 @@ func turn_on() -> void:
 	_update_timer()
 
 func turn_off() -> void:
-	if _active == false:
-		return
+	if _active == false: return
 	_active = false
 	emit_signal("pillar_state_changed", false)
-	_pulse_timer.stop()
+	if _pulse_timer: _pulse_timer.stop()   # ← guard
 
 func _update_timer() -> void:
-	if _active == false:
+	# Central sim handles auto pulses now. Keep this a no-op or guard the timer.
+	if _pulse_timer == null:
 		return
 	if GS.is_venting:
 		_pulse_timer.stop()
@@ -136,12 +151,6 @@ func _update_timer() -> void:
 		_pulse_timer.start()
 	else:
 		_pulse_timer.stop()
-
-func _on_vent_start() -> void: _vent_lock()
-
-func _on_vent_end() -> void:
-	_on_unlock()
-	_update_timer()
 
 func manual_ignite() -> void:
 	if _active == false:
