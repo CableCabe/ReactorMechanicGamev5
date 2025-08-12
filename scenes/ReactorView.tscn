@@ -122,9 +122,11 @@ size_flags_vertical = 3
 
 [node name="Light" type="TextureRect" parent="MarginContainer/VBoxContainer/WarningsPanel/VBoxContainer/RowFuel"]
 layout_mode = 2
+size_flags_horizontal = 3
 
 [node name="MessageBox" type="PanelContainer" parent="MarginContainer/VBoxContainer/WarningsPanel/VBoxContainer/RowFuel"]
 layout_mode = 2
+size_flags_horizontal = 3
 
 [node name="Scroll" type="ScrollContainer" parent="MarginContainer/VBoxContainer/WarningsPanel/VBoxContainer/RowFuel/MessageBox"]
 layout_mode = 2
@@ -138,9 +140,11 @@ size_flags_vertical = 3
 
 [node name="Light" type="TextureRect" parent="MarginContainer/VBoxContainer/WarningsPanel/VBoxContainer/RowCoolant"]
 layout_mode = 2
+size_flags_horizontal = 3
 
 [node name="MessageBox" type="PanelContainer" parent="MarginContainer/VBoxContainer/WarningsPanel/VBoxContainer/RowCoolant"]
 layout_mode = 2
+size_flags_horizontal = 3
 
 [node name="ScrollContainer" type="ScrollContainer" parent="MarginContainer/VBoxContainer/WarningsPanel/VBoxContainer/RowCoolant/MessageBox"]
 layout_mode = 2
@@ -154,9 +158,11 @@ size_flags_vertical = 3
 
 [node name="Light" type="TextureRect" parent="MarginContainer/VBoxContainer/WarningsPanel/VBoxContainer/RowHeat"]
 layout_mode = 2
+size_flags_horizontal = 3
 
 [node name="MessageBox" type="PanelContainer" parent="MarginContainer/VBoxContainer/WarningsPanel/VBoxContainer/RowHeat"]
 layout_mode = 2
+size_flags_horizontal = 3
 
 [node name="ScrollContainer" type="ScrollContainer" parent="MarginContainer/VBoxContainer/WarningsPanel/VBoxContainer/RowHeat/MessageBox"]
 layout_mode = 2
