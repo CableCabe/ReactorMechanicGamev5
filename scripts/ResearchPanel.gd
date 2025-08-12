@@ -1,6 +1,6 @@
 # Drop-in patch for your current ResearchPanel.gd
 # Focus: remove references to `_all_item_rows` and define `_apply_item`
-# Assumes you have GameState as an autoload with `eu` and `research_db`
+# Assumes you have GS as an autoload with `eu` and `research_db`
 
 extends PanelContainer
 
@@ -8,20 +8,21 @@ var _rows: Dictionary = {}  # key -> {meta, buy_button, cost_label, row}
 
 # Using explicit path so you don't need the Unique Name toggle right now
 @onready var list: VBoxContainer = $MarginContainer/VBoxContainer/ScrollContainer/List
+@onready var GS = get_node("/root/GameState")
 
 signal research_loaded
 var research_db: Dictionary = {}
 
 func _ready() -> void:
 	# Always build once (shows placeholder if DB empty), then listen for updates
-	GameState.eu_changed.connect(_refresh_affordability)
+	GS.eu_changed.connect(_refresh_affordability)
 	assert(list != null, "ResearchPanel: List container not found at $MarginContainer/VBoxContainer/ScrollContainer/List")
 	_build()
 	_load_research()
-	_refresh_affordability(GameState.eu)
-	# If GameState emits `research_loaded` after loading JSON, hook it up.
-	if GameState.has_signal("research_loaded"):
-		GameState.connect("research_loaded", Callable(self, "_on_research_loaded"))
+	_refresh_affordability(GS.eu)
+	# If GS emits `research_loaded` after loading JSON, hook it up.
+	if GS.has_signal("research_loaded"):
+		GS.connect("research_loaded", Callable(self, "_on_research_loaded"))
 
 func _load_research() -> void:
 	var path = "res://data/research.json"
@@ -50,7 +51,7 @@ func _load_research() -> void:
 
 func _build() -> void:
 	# safety: bail if db not ready
-	if GameState.research_db.size() == 0:
+	if GS.research_db.size() == 0:
 		# optional: show a placeholder row so we know UI is alive
 		list.add_child(Label.new())
 		(list.get_child(list.get_child_count()-1) as Label).text = "Research data not loaded"
@@ -61,8 +62,8 @@ func _build() -> void:
 	_rows.clear()
 
 	# Build from research db
-	for key in GameState.research_db.keys():
-		var meta: Dictionary = GameState.research_db[key]
+	for key in GS.research_db.keys():
+		var meta: Dictionary = GS.research_db[key]
 		_make_row(key, meta)
 	print("ResearchPanel built rows:", _rows.size(), "list children:", list.get_child_count())
 
@@ -107,7 +108,7 @@ func _on_row_hover(key: String, inside: bool) -> void:
 	if item == null: return
 	var meta: Dictionary = item["meta"]
 	var cost_eu := _cost_eu_from(meta)
-	var afford_ok := GameState.eu >= cost_eu
+	var afford_ok : float = GS.eu >= cost_eu
 	var lbl := item["cost_label"] as Label
 
 	if not afford_ok and inside:
@@ -122,10 +123,10 @@ func _refresh_affordability(_v: float) -> void:
 		var row: Dictionary = _rows[item_key]
 		var meta: Dictionary = row["meta"]
 		var cost_eu := _cost_eu_for_next_level(item_key, meta)
-		var afford_ok := GameState.eu >= cost_eu
+		var afford_ok : float = GS.eu >= cost_eu
 
 		(row["buy_button"] as Button).disabled = not afford_ok
-		(row["buy_button"] as Button).tooltip_text = "Need %d Eu | Have %d Eu" % [int(cost_eu), int(GameState.eu)]
+		(row["buy_button"] as Button).tooltip_text = "Need %d Eu | Have %d Eu" % [int(cost_eu), int(GS.eu)]
 		(row["cost_label"] as Label).modulate = Color(1,1,1)
 
 # -- internal: handle Buy click --
@@ -136,7 +137,7 @@ func _on_buy(key: String) -> void:
 	var meta: Dictionary = row["meta"]
 	var cost_eu := _cost_eu_for_next_level(key, meta)
 
-	if GameState.spend_eu(cost_eu):
+	if GS.spend_eu(cost_eu):
 		# advance level
 		var new_lvl := _get_next_level_index(key) + 1
 		_set_level_index(key, new_lvl)
@@ -146,7 +147,7 @@ func _on_buy(key: String) -> void:
 		(row["cost_label"] as Label).text = "%d Eu" % int(next_cost)
 
 		_apply_item(key)  # your real effect hook
-		_refresh_affordability(GameState.eu)
+		_refresh_affordability(GS.eu)
 	else:
 		# optional: flash not-enough
 		pass
@@ -154,16 +155,16 @@ func _on_buy(key: String) -> void:
 # -- internal: apply the effect of a research --
 func _apply_item(key: String) -> void:
 	# TODO: call into your real application logic.
-	# Example: GameState.apply_research(key)
+	# Example: GS.apply_research(key)
 	# For now, just log and refresh the button state
 	print("Applied research:", key)
-	_refresh_affordability(GameState.eu)
+	_refresh_affordability(GS.eu)
 
 # -- callbacks --
 func _on_research_loaded() -> void:
 	# Rebuild once data arrives
 	_build()
-	_refresh_affordability(GameState.eu)
+	_refresh_affordability(GS.eu)
 
 # --- helpers: robust cost parsing ---
 func _parse_number_any(s: String) -> float:
@@ -219,16 +220,16 @@ func _cost_eu_from(meta: Dictionary) -> float:
 	return n
 
 func _get_next_level_index(key: String) -> int:
-	# prefer GameState storage if you have it; fall back to per-row memory; else 0
-	if "research_levels" in GameState:
-		return int(GameState.research_levels.get(key, 0))
+	# prefer GS storage if you have it; fall back to per-row memory; else 0
+	if "research_levels" in GS:
+		return int(GS.research_levels.get(key, 0))
 	if _rows.has(key) and _rows[key].has("level"):
 		return int(_rows[key]["level"])
 	return 0
 
 func _set_level_index(key: String, lvl: int) -> void:
-	if "research_levels" in GameState:
-		GameState.research_levels[key] = lvl
+	if "research_levels" in GS:
+		GS.research_levels[key] = lvl
 	else:
 		if _rows.has(key):
 			_rows[key]["level"] = lvl

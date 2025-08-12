@@ -1,4 +1,4 @@
-# scripts/GameState.gd (autoload singleton)
+# scripts/GS.gd (autoload singleton)
 extends Node
 
 # --- Core State ---

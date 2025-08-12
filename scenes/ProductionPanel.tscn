@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3 uid="uid://cpqmv4gp7dihg"]
+[gd_scene load_steps=3 format=3 uid="uid://cpqmv4gp7dihg"]
 
 [ext_resource type="Script" path="res://scripts/ProductionPanel.gd" id="1_p4oa1"]
+[ext_resource type="Script" path="res://scripts/IgniteBtn.gd" id="2_hgjt7"]
 
 [node name="ProductionPanel" type="PanelContainer"]
 script = ExtResource("1_p4oa1")
@@ -20,6 +21,7 @@ unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Ignite (+2 Eu)"
+script = ExtResource("2_hgjt7")
 
 [node name="IgniteUpgradeBtn" type="Button" parent="VBoxContainer/HBoxContainer2"]
 unique_name_in_owner = true
