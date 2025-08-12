@@ -9,8 +9,7 @@ extends HBoxContainer
 @onready var eu_label: Label = $EuLabel
 @onready var money_label: Label = $MoneyLabel
 @onready var GS = get_node("/root/GameState")
-# @onready var fuel_label: Label = $Fuel
-# @onready var coolant_label: Label = $Coolant
+@onready var ept_label: Label = $EuPerTick
 
 var _accum := 0.0
 
@@ -25,7 +24,7 @@ func _ready() -> void:
 
 func _process(delta: float) -> void:
 	_accum += delta
-	if _accum >= 0.25: # refresh ~4 times per second
+	if _accum >= 0.15:
 		_accum = 0.0
 		_refresh()
 
@@ -35,5 +34,4 @@ func _on_state_bump(_v := 0.0) -> void:
 func _refresh() -> void:
 	eu_label.text = "Eu: %.1f" % GS.eu
 	money_label.text = "$$: %.1f" % GS.money
-	# fuel_label.text = "Fuel: %.1f" % GS.fuel
-	# coolant_label.text = "Coolant: %.1f" % GS.coolant
+	ept_label.text = "Eu/t: %.1f" % GS._eu

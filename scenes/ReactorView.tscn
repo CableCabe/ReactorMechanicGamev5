@@ -4,6 +4,8 @@
 [ext_resource type="Script" path="res://scripts/WarningsPanel.gd" id="2_n1bl1"]
 
 [node name="ReactorView" type="PanelContainer"]
+offset_right = 240.0
+offset_bottom = 647.0
 script = ExtResource("1_i5bm2")
 fuel_value_path = NodePath("MarginContainer/VBoxContainer/FuelText/FuelValue")
 coolant_value_path = NodePath("MarginContainer/VBoxContainer/CoolantText/CoolantValue")
@@ -107,7 +109,6 @@ layout_mode = 2
 
 [node name="WarningsPanel" type="PanelContainer" parent="MarginContainer/VBoxContainer"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 272.96)
 layout_mode = 2
 size_flags_vertical = 3
 script = ExtResource("2_n1bl1")
