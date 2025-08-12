@@ -87,7 +87,7 @@ func _on_upgrade() -> void:
 func _on_unlock() -> void:
 	GS.unlock_pillar(idx)
 
-func _on_pillar_fired(i: int, payload: Variant = null) -> void:
+func _on_pillar_fired(i: int, _payload: Variant = null) -> void:
 	if i != idx: return
 	if not _active: return
 	if GS.is_venting: return

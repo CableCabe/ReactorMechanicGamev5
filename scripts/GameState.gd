@@ -339,7 +339,7 @@ func start_vent() -> void:
 	_auto_ignite_was_enabled = auto_ignite_enabled
 	auto_ignite_enabled = false
 	manual_ignite_enabled = false
-	emit_signal("venting_started")
+	emit_signal("vent_started")
 
 	# start/arm the timer cleanly
 	_vent_timer.stop()
@@ -364,7 +364,7 @@ func _on_vent_timeout() -> void:
 	is_venting = false
 	auto_ignite_enabled = _auto_ignite_was_enabled
 	manual_ignite_enabled = true
-	emit_signal("venting_finished")
+	emit_signal("vent_finished")
 
 
 

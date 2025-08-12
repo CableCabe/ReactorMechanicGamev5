@@ -4,17 +4,38 @@ class_name WarningsPanel
 const MAX_MESSAGES_DEFAULT := 50
 var _systems := {}  # key -> { light: TextureRect, vbox: VBoxContainer, scroll: ScrollContainer, max: int }
 
+func _ready() -> void:
+	# Find rows anywhere under this panel, not just direct children
+	var row_heat := _find_row(["RowHeat"])
+	var row_fuel := _find_row(["RowFuel"])
+	var row_cool := _find_row(["RowCoolant", "RowCooling"])
+
+	if row_heat: register_system("heat", row_heat)
+	if row_fuel: register_system("fuel", row_fuel)
+	if row_cool: register_system("cooling", row_cool)
+
+	hook_standard_events()
+
+func _find_row(names: Array) -> HBoxContainer:
+	for n in names:
+		var r := find_child(n, true, false)  # recursive
+		if r is HBoxContainer:
+			return r
+	return null
+
 func register_system(key: String, row: HBoxContainer, max_messages: int = MAX_MESSAGES_DEFAULT) -> void:
 	if row == null:
 		push_error("WarningsPanel.register_system: row is null for key '%s'" % key)
 		return
 
-	# Light
+	# Light (optional; don’t crash if missing)
 	var light := row.get_node_or_null("Light") as TextureRect
 	if light == null:
-		push_error("WarningsPanel.register_system: '%s' missing child 'Light'" % row.name)
+		light = TextureRect.new()
+		light.name = "Light"
+		row.add_child(light)
 
-	# Ensure MessageBox/Scroll/VBox exist; tolerate variant names
+	# Ensure MessageBox/Scroll/VBox exist
 	var msg_box := row.get_node_or_null("MessageBox") as PanelContainer
 	if msg_box == null:
 		msg_box = PanelContainer.new()
@@ -35,12 +56,7 @@ func register_system(key: String, row: HBoxContainer, max_messages: int = MAX_ME
 		vbox.name = "VBox"
 		scroll.add_child(vbox)
 
-	_systems[key] = {
-		"light": light,
-		"vbox": vbox,
-		"scroll": scroll,
-		"max": max_messages
-	}
+	_systems[key] = { "light": light, "vbox": vbox, "scroll": scroll, "max": max_messages }
 	set_light(key, false)
 	clear_messages(key)
 
