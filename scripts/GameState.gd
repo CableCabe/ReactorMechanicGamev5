@@ -19,6 +19,7 @@ var eu: float:
 			eu_changed.emit(_eu)
 var money: float = 0.0
 var flags: Dictionary = {"auto_sell_ratio": 0.01}
+var _in_pillar_tick := false  # set around the central pillar loop
 
 const FUEL_TO_EU := 18.0
 const BASE_EU_S := 1.0
@@ -454,7 +455,7 @@ func sim_tick(dt: float) -> void:
 	var produced_eu: float = 0.0
 	var heat_pulse: float = 0.0
 	var total_heat_s: float = BASE_HEAT_S
-	_tick_pillars(dt)
+	
 	var gstats: Dictionary = base_stats()
 	apply_mods(gstats, global_mods())
 	var interval: float = effective_interval(gstats)
@@ -467,6 +468,9 @@ func sim_tick(dt: float) -> void:
 		# accumulate time
 		p["timer"] = float(p.get("timer", 0.0)) + dt
 
+		if is_venting:
+			continue
+			
 		# fire as many times as interval allows
 		var fired: bool = false
 		while float(p["timer"]) >= interval:
@@ -494,19 +498,21 @@ func sim_tick(dt: float) -> void:
 		if fired:
 			emit_signal("pillar_fired", i)
 
-	# apply outputs
-	eu += produced_eu
+	if produced_eu > 0.0:
+		add_eu(produced_eu, "pillar_sim")   # reason starts with "pillar_…" if you prefer
+
 	if dt > 0.0:
 		total_heat_s += heat_pulse / dt
-		
+
+	# Vent cooling happens AFTER (and now there’s no production during vent)
 	if is_venting:
-		var step: float = _vent_rate * dt           # % points this tick
+		var step: float = _vent_rate * dt
 		if step > _vent_cool_remaining:
 			step = _vent_cool_remaining
 		_vent_cool_remaining -= step
-		set_heat(heat - step)                        # use the setter so UI updates
-		# print("VENT TICK  step=", step, "  heat=", heat)   # optional debug
-		return                                       # skip normal warm/cool this tick
+		set_heat(heat - step)
+		return
+		
 
 	# cooling & heat application
 	var coolant_flow: float = 1.0 if coolant > 0.0 else 0.0
@@ -538,8 +544,20 @@ func _count_enabled_pillars() -> int:
 
 #  ---- ECONOMY STUFF ----
 
-func add_eu(a: float) -> void:
-	eu = eu + a
+func add_eu(amount: float, reason: String = "") -> void:
+	if amount == 0.0:
+		return
+	# TEMP: see who’s doing this
+	print("[EU+] +", amount, " reason=", reason, " vent=", is_venting)
+	# Uncomment once to see the exact call path:
+	# print_stack()
+
+	# Hard block pillar-produced EU during vent (see step B)
+	if is_venting and (_in_pillar_tick or reason.begins_with("pillar")):
+		return
+
+	eu += amount
+	emit_signal("eu_changed", eu)
 
 func spend_eu(a: float) -> bool:
 	if _eu >= a:
@@ -884,21 +902,22 @@ func _tick_pillars(dt: float) -> void:
 		var count: int = min(PILLAR_COUNT, pillars.size())
 		for i in range(count):
 			var p: Dictionary = pillars[i]
-			if not bool(p.get("unlocked", false)):
-				continue
-			if not bool(p.get("enabled", true)):
-				continue
-			_pillar_accum[i] = _pillar_accum[i] + dt
+			if not bool(p.get("unlocked", false)): continue
+			if not bool(p.get("enabled", true)):   continue
+
+			_pillar_accum[i] += dt
 			var need: float = _pillar_interval(i)
-			while _pillar_accum[i] >= need:
-				_pillar_accum[i] = _pillar_accum[i] - need
-				var lvl: int = int(p.get("level", 1))
-				var eu_gain: float = PILLAR_EU_BASE * float(lvl)
-				add_eu(eu_gain)
-				add_heat_pulse(IGNITE_HEAT_PULSE * 0.25)  # tiny heat nudge
-				
-				print("[GS] EMIT pillar_fired i=", i)
-				pillar_fired.emit(i)
+			if _pillar_accum[i] < need: continue
+			_pillar_accum[i] -= need
+
+			var lvl  := int(p.get("level", 1))
+			var gain := PILLAR_EU_BASE * float(lvl)
+	
+			add_eu(gain, "pillar_%d" % i)
+			add_heat_pulse(IGNITE_HEAT_PULSE * 0.25)
+
+			pillar_fired.emit(i)  # flash hook (UI listens to this)
+		_in_pillar_tick = false
 
 	
 #  ---- RESEARCH STUFF ----
