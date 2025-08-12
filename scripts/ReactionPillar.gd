@@ -7,7 +7,7 @@ extends Control
 @onready var level_label: Label = $Row/LevelLabel
 @onready var toggle: CheckBox   = $Row/OnToggle
 @onready var up_btn: Button     = $Row/UpgradeBtn
-@onready var unlock_btn: Button = $Row/UnlockBtn
+@onready var unlock_btn: Button = %UnlockBtn
 @onready var pulse_label: Label = $Row/PulseLabel     
 @onready var flash: ColorRect   = $Flash 
 @export var fuel_per_pulse: float = 1.0
@@ -19,6 +19,7 @@ extends Control
 	else get_tree().root.get_node_or_null("GameState")
 )
 
+var _ui_resolved := false
 var _tween: Tween
 var _active: bool = false
 var _pulse_timer: Timer
@@ -33,9 +34,16 @@ func _ready() -> void:
 		push_error("ReactionPillar: no '/root/GS' or '/root/GameState' autoload found.")
 		return
 	
+	_resolve_ui()
+	
 	toggle.toggled.connect(_on_toggle)
 	up_btn.pressed.connect(_on_upgrade)
 	unlock_btn.pressed.connect(_on_unlock)
+	
+	if GS.has_signal("state_changed"):
+		GS.connect("state_changed", Callable(self, "_refresh"))
+	if GS.has_signal("eu_changed"):
+		GS.connect("eu_changed",   Callable(self, "_refresh"))
 	
 	flash.modulate.a = 0.0
 	flash.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -53,9 +61,12 @@ func _ready() -> void:
 		GS.connect("venting_finished", Callable(self, "_on_vent_end"))
 	if GS.has_signal("pillar_no_fuel"):
 		GS.connect("pillar_no_fuel", Callable(self, "_on_pillar_no_fuel"))
+	
+	if toggle:     toggle.toggled.connect(_on_toggle)
+	if up_btn:     up_btn.pressed.connect(_on_upgrade)
+	if unlock_btn: unlock_btn.pressed.connect(_on_unlock)
 
 	add_to_group("reaction_pillars")
-	
 	_refresh()  # initial sync
 	
 	# Future timer
@@ -75,16 +86,39 @@ func _refresh() -> void:
 	toggle.visible = is_unlocked
 	up_btn.visible = is_unlocked
 	unlock_btn.visible = not is_unlocked
+	
+	if toggle:     toggle.visible     = is_unlocked
+	if up_btn:     up_btn.visible     = is_unlocked
+	if unlock_btn: unlock_btn.visible = not is_unlocked
 
 	if is_unlocked:
-		level_label.text = "Lv. %d" % int(p.get("level", 0))
-
+		# level & upgrade price
+		if level_label:
+			level_label.text = "Lv. %d" % int(p.get("level", 0))
 		var cost: Dictionary = GS.pillar_upgrade_cost(int(p.get("level", 0)))
-		up_btn.text = "Upgrade (Eu %.0f)" % float(cost.get("eu", 0.0))
-		up_btn.disabled = not GS.can_afford(cost)
+		if up_btn:
+			up_btn.text = "Upgrade (Eu %.0f)" % float(cost.get("eu", 0.0))
+			up_btn.disabled = not GS.can_afford(cost)
 
-	toggle.set_pressed_no_signal(is_enabled)
-	
+		# per-pulse EU readout
+		if pulse_label:
+			var pulse_val: float = GS.pillar_pulse_eu(idx)
+			pulse_label.text = "+%.2f Eu" % pulse_val
+	else:
+		# locked: show unlock price (and grey when unaffordable)
+		var uc: Dictionary = GS.unlock_cost(idx)
+		if unlock_btn:
+			var price := float(uc.get("eu", 0.0))
+			unlock_btn.text = "Unlock (Eu %.0f)" % price
+			unlock_btn.disabled = not GS.can_afford(uc)
+		if pulse_label:
+			pulse_label.text = ""  # or "Locked"
+
+	# keep checkbox in sync without firing its signal
+	if toggle:
+		toggle.set_pressed_no_signal(is_enabled)
+
+	# drive local active so flash gating works
 	if is_unlocked and is_enabled:
 		if not _active: turn_on()
 	else:
@@ -94,20 +128,49 @@ func set_pillar_index(i: int) -> void:
 	idx = i
 	_refresh()
 
+func _resolve_ui() -> void:
+	if _ui_resolved: return
+	var row := $Row
+	if row == null: return
+	
+	var places: Array = [row]
+	for base in places:
+		if base == null: continue
+		if pulse_label == null:
+			pulse_label = base.get_node_or_null("PulseLabel") as Label
+		if name_label == null:
+			name_label  = base.get_node_or_null("NameLabel")  as Label
+		if level_label == null:
+			level_label = base.get_node_or_null("LevelLabel") as Label
+		if toggle == null:
+			toggle      = base.get_node_or_null("OnToggle")   as CheckBox
+		if up_btn == null:
+			up_btn      = base.get_node_or_null("UpgradeBtn") as Button
+		if unlock_btn == null:
+			unlock_btn  = base.get_node_or_null("UnlockBtn")  as Button
+	
+	if pulse_label:
+		pulse_label.custom_minimum_size.x = 32
+
+	_ui_resolved = true
+
 func _on_toggle(on: bool) -> void:
 	GS.set_pillar_enabled(idx, on)
 	_refresh()
 
 func _on_upgrade() -> void:
 	GS.upgrade_pillar(idx)
+	_refresh()
 
 func _vent_lock() -> void:
 	_vent_locked = true
 	if _pulse_timer: _pulse_timer.stop()
 
 func _on_unlock() -> void:
+	GS.unlock_pillar(idx)
 	_vent_locked = false
 	_update_timer()
+	_refresh()
 
 func _on_pillar_fired(i: int, _payload: Variant = null) -> void:
 	if i != idx: return
