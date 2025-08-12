@@ -110,6 +110,8 @@ func _on_vent() -> void:
 	_vent_timer.start()
 
 func _on_vent_started() -> void:
+	GS.start_vent()
+	ignite_btn.disabled = true  # immediate lock
 	vent_btn.disabled = true
 	vent_btn.text = "Venting…"
 	if ignite_button != null:

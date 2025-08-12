@@ -161,6 +161,7 @@ signal pillar_no_fuel(pillar_path: NodePath)
 
 # ---- READY ----
 func _ready() -> void:
+	set_process(true)
 	# Create a private, non-autostart timer so nothing fires early
 	_vent_timer = Timer.new()
 	_vent_timer.name = "VentTimerPriv"
@@ -398,15 +399,11 @@ func _process(delta: float) -> void:
 		cool += IDLE_COOL_PER_SEC
 
 	# Venting bonus
-	if is_venting:
-		# deterministic drop: ~VENT_DROP_TOTAL over VENT_DURATION_SEC
-		var vent_rate: float = VENT_DROP_TOTAL / max(VENT_DURATION_SEC, 0.001)
-		var step: float = vent_rate * delta
-		if step > _vent_cool_remaining:
-			step = _vent_cool_remaining
-		_vent_cool_remaining -= step
-		set_heat(_heat - step)
-		return   # skip normal warm/cool while venting
+	if is_venting and heat > 0.0:
+		var old := heat
+		heat = max(0.0, heat - _vent_rate * delta)
+		if heat != old:
+			emit_signal("heat_changed", heat)
 	
 	# Fuel: optional passive refill
 	if FUEL_REFILL_PER_SEC > 0.0 and _fuel < fuel_cap:
@@ -884,13 +881,19 @@ func pillar_upgrade_cost(level: int) -> Dictionary:
 func upgrade_pillar(idx: int) -> void:
 	if idx < 0 or idx >= pillars.size():
 		return
-	var lvl: int = pillars[idx]["level"]
-	var cost := pillar_upgrade_cost(lvl)
+
+	var lvt: int = int(pillars[idx].get("level", 0))
+
+	# cost is a DICTIONARY (e.g. {"eu": 50.0})
+	var cost: Dictionary = pillar_upgrade_cost(lvt)
+
 	if not can_afford(cost):
 		return
-	pay(cost)
-	pillars[idx]["level"] = lvl + 1
+	pay(cost)  # uses your existing multi-currency deduction
+
+	pillars[idx]["level"] = lvt + 1
 	emit_signal("state_changed")
+	emit_signal("eu_changed", eu)
 	
 func _tick_pillars(dt: float) -> void:
 	var count: int = min(PILLAR_COUNT, pillars.size())
