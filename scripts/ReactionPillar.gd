@@ -22,13 +22,13 @@ extends Control
 var _tween: Tween
 var _active: bool = false
 var _pulse_timer: Timer
+var _vent_locked: bool = false
 
 signal pillar_state_changed(active: bool)
 signal show_no_fuel_flag
 signal hide_no_fuel_flag
 
 func _ready() -> void:
-	# ...your existing UI hookups...
 	if GS == null:
 		push_error("ReactionPillar: no '/root/GS' or '/root/GameState' autoload found.")
 		return
@@ -36,7 +36,6 @@ func _ready() -> void:
 	if GS.has_signal("state_changed"):
 		GS.connect("state_changed", Callable(self, "_refresh"))
 
-	# IMPORTANT: connect here (not inside the handler) and bind this pillar’s index
 	if GS.has_signal("pillar_fired"):
 		GS.connect("pillar_fired", Callable(self, "_on_pillar_fired").bind(idx))
 
@@ -60,15 +59,14 @@ func _refresh() -> void:
 
 	if is_unlocked:
 		level_label.text = "Lv. %d" % int(p.get("level", 0))
-		toggle.button_pressed = bool(p.get("enabled", false))
 
 		var cost: Dictionary = GS.pillar_upgrade_cost(int(p.get("level", 0)))
 		up_btn.text = "Upgrade (Eu %.0f)" % float(cost.get("eu", 0.0))
 		up_btn.disabled = not GS.can_afford(cost)
 
 		# NEW: per-pulse readout
-		var pulse : float = GS.pillar_pulse_eu(idx)
-		pulse_label.text = "+%.2f Eu | " % pulse
+#		var pulse : float = GS.pillar_pulse_eu(idx)
+#		pulse_label.text = "+%.2f Eu | " % pulse
 	else:
 		var uc: Dictionary = GS.unlock_cost(idx)
 		unlock_btn.text = "Unlock (Eu %.0f)" % float(uc.get("eu", 0.0))
@@ -84,8 +82,13 @@ func _on_toggle(on: bool) -> void:
 func _on_upgrade() -> void:
 	GS.upgrade_pillar(idx)
 
+func _vent_lock() -> void:
+	_vent_locked = true
+	if _pulse_timer: _pulse_timer.stop()
+
 func _on_unlock() -> void:
-	GS.unlock_pillar(idx)
+	_vent_locked = false
+	_update_timer()
 
 func _on_pillar_fired(i: int, _payload: Variant = null) -> void:
 	if i != idx: return
@@ -134,7 +137,10 @@ func _update_timer() -> void:
 	else:
 		_pulse_timer.stop()
 
+func _on_vent_start() -> void: _vent_lock()
+
 func _on_vent_end() -> void:
+	_on_unlock()
 	_update_timer()
 
 func manual_ignite() -> void:
@@ -142,20 +148,23 @@ func manual_ignite() -> void:
 		return
 	if GS.is_venting:
 		return
-	if GS.manual_ignite_enabled:
-		_on_pulse()
+	#if GS.manual_ignite_enabled:
+		#_on_pulse()
+	if _vent_locked or not _active or GS.is_venting: return
+	_on_pulse()
 
 func _on_pulse() -> void:
-	if GS.is_venting:
+	if _vent_locked or GS.is_venting: 
 		return
-	var ok : bool = GS.consume_fuel(fuel_per_pulse, self)
-	if ok == false:
-		turn_off()
-		emit_signal("show_no_fuel_flag")
-		return
+	else:
+		var ok : bool = GS.consume_fuel(fuel_per_pulse, self)
+		if ok == false:
+			turn_off()
+			emit_signal("show_no_fuel_flag")
+			return
 	# Successful pulse → integrate with your EU/heat logic here
 	# Example: GS.add_eu(pulse_eu)
-	emit_signal("hide_no_fuel_flag")
+		emit_signal("hide_no_fuel_flag")
 
 func _on_pillar_no_fuel(path: NodePath) -> void:
 	if get_path() == path:

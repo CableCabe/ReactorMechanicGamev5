@@ -221,7 +221,7 @@ func _load_research() -> void:
 				var k = e.get("key", e.get("id", e.get("name", "item_%d" % d.size())))
 				d[k] = e
 			research_db = d
-		print("Loaded research entries:", research_db.size())
+		#print("Loaded research entries:", research_db.size())
 	else:
 		push_error("Missing research.json at res://data/research.json")
 	research_loaded.emit()
@@ -329,31 +329,23 @@ func heat_rate_mult() -> float:
 # ---- VENTING ----
 
 func start_vent() -> void:
-	# PRINTS FIRST so we see it even if we early-return
-	#print("[GS] start_vent requested; is_venting=", is_venting, " duration=", vent_duration)
-	#if is_venting:
-	#	print("[GS] already venting → ignore")
-	#	return
-
+	if is_venting: return
 	is_venting = true
 	_auto_ignite_was_enabled = auto_ignite_enabled
 	auto_ignite_enabled = false
 	manual_ignite_enabled = false
 	emit_signal("venting_started")
-
-	# start/arm the timer cleanly
+	get_tree().call_group("reaction_pillars", "_vent_lock")   # <—
 	_vent_timer.stop()
 	_vent_timer.wait_time = max(0.01, vent_duration)
 	_vent_timer.start()
-	#print("[GS] vent timer started; time_left=", _vent_timer.time_left)
-	
 
 func _on_vent_timeout() -> void:
-	#print("[GS] vent finished; time_left=", _vent_timer.time_left)
 	is_venting = false
 	auto_ignite_enabled = _auto_ignite_was_enabled
 	manual_ignite_enabled = true
 	emit_signal("venting_finished")
+	get_tree().call_group("reaction_pillars", "_vent_unlock")
 
 
 
@@ -886,23 +878,27 @@ func upgrade_pillar(idx: int) -> void:
 	
 func _tick_pillars(dt: float) -> void:
 	if is_venting:
+		#print("trip")
 		return
-	var count: int = min(PILLAR_COUNT, pillars.size())
-	for i in range(count):
-		var p: Dictionary = pillars[i]
-		if not bool(p.get("unlocked", false)):
-			continue
-		if not bool(p.get("enabled", true)):
-			continue
-		_pillar_accum[i] = _pillar_accum[i] + dt
-		var need: float = _pillar_interval(i)
-		while _pillar_accum[i] >= need:
-			_pillar_accum[i] = _pillar_accum[i] - need
-			var lvl: int = int(p.get("level", 1))
-			var eu_gain: float = PILLAR_EU_BASE * float(lvl)
-			add_eu(eu_gain)
-			add_heat_pulse(IGNITE_HEAT_PULSE * 0.25)  # tiny heat nudge
-			pillar_fired.emit(i)
+	else:
+		var count: int = min(PILLAR_COUNT, pillars.size())
+		for i in range(count):
+			var p: Dictionary = pillars[i]
+			if not bool(p.get("unlocked", false)):
+				continue
+			if not bool(p.get("enabled", true)):
+				continue
+			_pillar_accum[i] = _pillar_accum[i] + dt
+			var need: float = _pillar_interval(i)
+			while _pillar_accum[i] >= need:
+				_pillar_accum[i] = _pillar_accum[i] - need
+				var lvl: int = int(p.get("level", 1))
+				var eu_gain: float = PILLAR_EU_BASE * float(lvl)
+				add_eu(eu_gain)
+				add_heat_pulse(IGNITE_HEAT_PULSE * 0.25)  # tiny heat nudge
+				
+				print("[GS] EMIT pillar_fired i=", i)
+				pillar_fired.emit(i)
 
 	
 #  ---- RESEARCH STUFF ----
