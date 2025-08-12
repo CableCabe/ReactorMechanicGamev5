@@ -33,6 +33,9 @@ var research_levels: Dictionary = {}
 # PILLARS
 var pillars: Array = []   # Array of Dictionary {"id":int, "level":int, "enabled":bool}
 var _pillar_accum: Array = []            # per-pillar timers
+var manual_ignite_enabled: bool = true
+var auto_ignite_enabled: bool = true
+var _auto_ignite_was_enabled: bool = true
 
 const NUM_PILLARS := 6
 const PILLAR_COUNT := 6
@@ -106,6 +109,8 @@ var _vent_timer: Timer
 var _vent_cool_remaining: float = 0.0
 var _vent_rate: float = 0.0                 # % points per second during vent
 
+@export var vent_duration: float = 4.0
+
 # Fixed‑timestep accumulator (10 Hz)
 const STEP := 0.1
 var _accum := 0.0
@@ -145,12 +150,24 @@ signal fuel_changed(value)
 signal coolant_changed(value)
 signal pillar_fired(idx: int)
 signal money_changed(value)
+signal fuel_empty
+signal pillar_no_fuel(pillar_path: NodePath)
 
 
 # ---- DEBUG ----
 
 
 
+
+# ---- READY ----
+func _ready() -> void:
+	# Create a private timer that cannot autostart accidentally
+	_vent_timer = Timer.new()
+	_vent_timer.name = "VentTimerPriv"
+	_vent_timer.one_shot = true
+	_vent_timer.autostart = false
+	add_child(_vent_timer)
+	_vent_timer.timeout.connect(_on_vent_timeout)
 
 # ---- LOADING ----
 func _enter_tree() -> void:
@@ -310,6 +327,25 @@ func heat_rate_mult() -> float:
 
 # ---- VENTING ----
 
+func start_vent() -> void:
+	# PRINTS FIRST so we see it even if we early-return
+	print("[GS] start_vent requested; is_venting=", is_venting, " duration=", vent_duration)
+	if is_venting:
+		print("[GS] already venting → ignore")
+		return
+
+	is_venting = true
+	_auto_ignite_was_enabled = auto_ignite_enabled
+	auto_ignite_enabled = false
+	manual_ignite_enabled = false
+	emit_signal("venting_started")
+
+	# start/arm the timer cleanly
+	_vent_timer.stop()
+	_vent_timer.wait_time = max(0.01, vent_duration)
+	_vent_timer.start()
+	print("[GS] vent timer started; time_left=", _vent_timer.time_left)
+
 func start_venting(duration: float = VENT_DURATION_SEC) -> void:
 	if is_venting:
 		return
@@ -320,12 +356,14 @@ func start_venting(duration: float = VENT_DURATION_SEC) -> void:
 	_vent_timer.stop()
 	_vent_timer.wait_time = duration
 	_vent_timer.start()
+	
 
 func _on_vent_timeout() -> void:
+	print("[GS] vent finished; time_left=", _vent_timer.time_left)
 	is_venting = false
-	_vent_rate = 0.0
-	_vent_cool_remaining = 0.0
-	vent_finished.emit()
+	auto_ignite_enabled = _auto_ignite_was_enabled
+	manual_ignite_enabled = true
+	emit_signal("venting_finished")
 
 
 
@@ -396,13 +434,40 @@ func _process(delta: float) -> void:
 	var dheat: float = (warm - cool) * delta
 	heat = _heat + dheat
 
-# ---- FUEL/COOLING ----
+# ---- FUEL ----
 
-func add_fuel(d: float) -> void:
-	fuel = _fuel + d
+func add_fuel(amount: float) -> void:
+	if amount <= 0.0:
+		return
+	fuel += amount
+	if fuel > fuel_cap:
+		fuel = fuel_cap
+	emit_signal("fuel_changed", fuel)
+
+func consume_fuel(amount: float, who: Node = null) -> bool:
+	if amount <= 0.0:
+		return true
+	if fuel >= amount:
+		fuel -= amount
+		emit_signal("fuel_changed", fuel)
+		if fuel <= 0.0:
+			emit_signal("fuel_empty")
+		return true
+	# Not enough fuel
+	emit_signal("fuel_empty")
+	if who != null:
+		emit_signal("pillar_no_fuel", who.get_path())
+	return false
+
+
+
+# ---- COOLING ----
 
 func add_coolant(d: float) -> void:
 	coolant = _coolant + d
+
+
+
 
 # ---- SIM TICK ----
 

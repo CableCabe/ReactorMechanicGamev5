@@ -20,6 +20,8 @@ extends PanelContainer
 @onready var coolant_bar: ProgressBar = get_node(coolant_bar_path) as ProgressBar
 @onready var heat_bar: ProgressBar    = %HeatBar
 
+@onready var warnings: WarningsPanel = %WarningsPanel
+
 # Thresholds: green for 25–100%, yellow for 10–25%, red for <10%
 const GREEN_MIN := 0.25
 const YELLOW_MIN := 0.10
@@ -59,7 +61,34 @@ func _ready() -> void:
 
 	_refresh()
 	
+	if warnings:
+		warnings.register_system("heat",    $WarningsPanel/VBoxContainer/RowHeat)
+		warnings.register_system("fuel",    $WarningsPanel/VBoxContainer/RowFuel)
+		warnings.register_system("cooling", $WarningsPanel/VBoxContainer/RowCoolant)
+		warnings.hook_standard_events()  # wires HEAT (venting) + FUEL
+		
+	# TEMP: prove UI shows — remove after you see it
+		warnings.add_message("heat", "(test) warnings panel alive", "info")
+	
+	if warnings != null and warnings.has_method("add_light"):
+		# Update these child paths to your actual rows under the warnings panel
+		var row_heat := warnings.get_node_or_null("VBoxContainer/RowHeat")
+		var row_fuel := warnings.get_node_or_null("VBoxContainer/RowFuel")
+		var row_cooling := warnings.get_node_or_null("VBoxContainer/RowCooling")
+		if row_heat != null:
+			warnings.call("add_light", "heat", row_heat)
+		if row_fuel != null:
+			warnings.call("add_light", "fuel", row_fuel)
+		if row_cooling != null:
+			warnings.call("add_light", "cooling", row_cooling)
+		warnings.call("hook_standard_events")  # wires HEAT (venting) + FUEL
+
+func set_cooling_warning(on: bool, text: String) -> void:
+	if warnings != null and warnings.has_method("set_cooling"):
+		warnings.call("set_cooling", on, text)
+
 var _dbg_left := 10
+
 func _on_heat_changed(v: float) -> void:
 	# print("UI HEAT -> ", v)
 	

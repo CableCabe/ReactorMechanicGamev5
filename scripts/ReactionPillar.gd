@@ -10,8 +10,17 @@ extends Control
 @onready var unlock_btn: Button = $Row/UnlockBtn
 @onready var pulse_label: Label = $Row/PulseLabel     
 @onready var flash: ColorRect   = $Flash 
+@export var fuel_per_pulse: float = 1.0
+@export var pulse_eu: float = 2.0
+@export var pulse_interval: float = 1.0
 
 var _tween: Tween
+var _active: bool = false
+var _pulse_timer: Timer
+
+signal pillar_state_changed(active: bool)
+signal show_no_fuel_flag
+signal hide_no_fuel_flag
 
 func _ready() -> void:
 	custom_minimum_size.y = max(32.0, $Row.get_combined_minimum_size().y)
@@ -22,6 +31,20 @@ func _ready() -> void:
 	GameState.state_changed.connect(_refresh)
 	GameState.pillar_fired.connect(_on_pillar_fired)
 	_refresh()
+	_pulse_timer = Timer.new()
+	_pulse_timer.wait_time = pulse_interval
+	_pulse_timer.autostart = false
+	add_child(_pulse_timer)
+	_pulse_timer.timeout.connect(_on_pulse)
+
+	if GameState.has_signal("venting_started"):
+		GameState.connect("venting_started", Callable(self, "_on_vent_start"))
+	if GameState.has_signal("venting_finished"):
+		GameState.connect("venting_finished", Callable(self, "_on_vent_end"))
+	if GameState.has_signal("pillar_no_fuel"):
+		GameState.connect("pillar_no_fuel", Callable(self, "_on_pillar_no_fuel"))
+	
+	add_to_group("reaction_pillars")
 
 func _refresh() -> void:
 	var p: Dictionary = GameState.get_pillar(idx)
@@ -61,6 +84,15 @@ func _on_unlock() -> void:
 	GameState.unlock_pillar(idx)
 
 func _on_pillar_fired(fired_idx: int) -> void:
+	 if not _active:
+		return
+	if GameState.is_venting:
+		return
+	if not GameState.consume_fuel(fuel_per_pulse, self):
+		turn_off()
+		emit_signal("show_no_fuel_flag")
+		return
+	
 	if fired_idx != idx:
 		return
 	# quick flash
@@ -74,3 +106,59 @@ func _on_pillar_fired(fired_idx: int) -> void:
 
 func _hide_flash() -> void:
 	flash.visible = false
+
+func turn_on() -> void:
+	if _active:
+		return
+	_active = true
+	emit_signal("pillar_state_changed", true)
+	_update_timer()
+
+func turn_off() -> void:
+	if _active == false:
+		return
+	_active = false
+	emit_signal("pillar_state_changed", false)
+	_pulse_timer.stop()
+
+func _update_timer() -> void:
+	if _active == false:
+		return
+	if GameState.is_venting:
+		_pulse_timer.stop()
+		return
+	if GameState.auto_ignite_enabled:
+		_pulse_timer.start()
+	else:
+		_pulse_timer.stop()
+
+func _on_vent_start() -> void:
+	_pulse_timer.stop()
+
+func _on_vent_end() -> void:
+	_update_timer()
+
+func manual_ignite() -> void:
+	if _active == false:
+		return
+	if GameState.is_venting:
+		return
+	if GameState.manual_ignite_enabled:
+		_on_pulse()
+
+func _on_pulse() -> void:
+	if GameState.is_venting:
+		return
+	var ok := GameState.consume_fuel(fuel_per_pulse, self)
+	if ok == false:
+		turn_off()
+		emit_signal("show_no_fuel_flag")
+		return
+	# Successful pulse → integrate with your EU/heat logic here
+	# Example: GameState.add_eu(pulse_eu)
+	emit_signal("hide_no_fuel_flag")
+
+func _on_pillar_no_fuel(path: NodePath) -> void:
+	if get_path() == path:
+		turn_off()
+		emit_signal("show_no_fuel_flag")

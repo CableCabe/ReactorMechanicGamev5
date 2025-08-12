@@ -4,6 +4,8 @@ extends PanelContainer
 @onready var ignite_upgrade_btn: Button = $VBoxContainer/HBoxContainer2/IgniteUpgradeBtn
 @onready var vent_btn: Button           = $VBoxContainer/HBoxContainer/VentBtn
 @onready var pillar_grid: GridContainer = $VBoxContainer/PillarGrid
+@export var ignite_button_path: NodePath
+@onready var ignite_button: Button = get_node(ignite_button_path)
 
 const HEAT_PULSE_PER_IGNITE: float = 6.0
 const PILLAR_SCENE := preload("res://scenes/ReactionPillar.tscn")
@@ -18,6 +20,13 @@ var ignite_cost_mult: float = 1.6
 var _vent_timer: Timer
 
 func _ready() -> void:
+	vent_btn.pressed.connect(_on_vent)  # ensure this connect exists
+	if GameState.has_signal("venting_started"):
+		GameState.connect("venting_started", Callable(self, "_on_vent_started"))
+	if GameState.has_signal("venting_finished"):
+		GameState.connect("venting_finished", Callable(self, "_on_vent_finished"))
+
+	_apply_venting_state()
 	GameState.ensure_pillars(PILLAR_COUNT)
 	ignite_btn.pressed.connect(_on_ignite)
 	ignite_upgrade_btn.pressed.connect(_on_ignite_upgrade)
@@ -32,7 +41,8 @@ func _ready() -> void:
 	
 	_refresh_buttons()
 	_build_pillars()
-
+	
+	
 func _process(delta: float) -> void:
 	if _vent_timer and _vent_timer.is_inside_tree():
 		var left: float = _vent_timer.time_left
@@ -77,9 +87,11 @@ func _refresh_buttons() -> void:
 			vent_btn.text = "VENT"
 
 func _on_vent() -> void:
+	print("[UI] Vent button pressed")
 	GameState.start_venting(3.0)
 	# UI will also get a vent_started signal, but disable immediately for snappy feedback
 	vent_btn.disabled = true
+	_apply_venting_state()
 
 	# start a local timer so we can show a countdown on the button
 	if not _vent_timer:
@@ -97,10 +109,13 @@ func _on_vent() -> void:
 func _on_vent_started() -> void:
 	vent_btn.disabled = true
 	vent_btn.text = "Venting…"
+	if ignite_button != null:
+		ignite_button.disabled = true
 
 func _on_vent_finished() -> void:
 	vent_btn.disabled = false
 	vent_btn.text = "VENT"
+	_apply_venting_state()
 
 func _on_local_vent_timer_timeout() -> void:
 	# Fallback UI sync: if GameState is still venting, stay disabled; else re-enable
@@ -110,6 +125,15 @@ func _on_local_vent_timer_timeout() -> void:
 	else:
 		vent_btn.disabled = false
 		vent_btn.text = "VENT"
+
+func _apply_venting_state() -> void:
+	# Disable while venting or when manual ignition is not allowed
+	if ignite_button == null:
+		return
+	if GameState.is_venting:
+		ignite_button.disabled = true
+		return
+	ignite_button.disabled = not GameState.manual_ignite_enabled
 
 func _build_pillars() -> void:
 	# clear grid
