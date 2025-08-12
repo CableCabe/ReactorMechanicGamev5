@@ -46,7 +46,7 @@ func _load_research() -> void:
 	else:
 		push_error("Unexpected JSON shape in " + path)
 
-	print("Loaded research entries:", research_db.size())
+	#print("Loaded research entries:", research_db.size())
 	research_loaded.emit()
 
 func _build() -> void:
@@ -65,7 +65,7 @@ func _build() -> void:
 	for key in GS.research_db.keys():
 		var meta: Dictionary = GS.research_db[key]
 		_make_row(key, meta)
-	print("ResearchPanel built rows:", _rows.size(), "list children:", list.get_child_count())
+	#print("ResearchPanel built rows:", _rows.size(), "list children:", list.get_child_count())
 
 # -- internal: build one row --
 func _make_row(key: String, meta: Dictionary) -> void:

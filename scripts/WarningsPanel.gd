@@ -14,6 +14,7 @@ func _ready() -> void:
 	if row_fuel: register_system("fuel", row_fuel)
 	if row_cool: register_system("cooling", row_cool)
 
+
 	hook_standard_events()
 
 func _find_row(names: Array) -> HBoxContainer:

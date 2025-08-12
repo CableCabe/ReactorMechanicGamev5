@@ -1,26 +1,25 @@
 extends PanelContainer
 
-@onready var ignite_btn: Button         = $VBoxContainer/HBoxContainer2/IgniteBtn
 @onready var ignite_upgrade_btn: Button = $VBoxContainer/HBoxContainer2/IgniteUpgradeBtn
 @onready var pillar_grid: GridContainer = $VBoxContainer/PillarGrid
 @onready var GS = get_node("/root/GameState")
 
 @export var vent_btn_path: NodePath
-@onready var vent_btn: Button = get_node(vent_btn_path)
+#@onready var vent_btn: Button = get_node(vent_btn_path)
 @export var ignite_btn_path: NodePath
-@onready var ignite_button: Button = get_node(ignite_btn_path)
+#@onready var ignite_btn: Button = get_node(ignite_btn_path)
 
-#@onready var vent_btn: Button = (
-#	(get_node_or_null(vent_btn_path) as Button)
-#	if not vent_btn_path.is_empty()
-#	else (find_child("VentBtn", true, false) as Button)
-#)
-#
-#@onready var ignite_btn: Button = (
-#	(get_node_or_null(ignite_btn_path) as Button)
-#	if not ignite_btn_path.is_empty()
-#	else (find_child("IgniteBtn", true, false) as Button)
-#)
+@onready var vent_btn: Button = (
+	(get_node_or_null(vent_btn_path) as Button)
+	if not vent_btn_path.is_empty()
+	else (find_child("VentBtn", true, false) as Button)
+)
+
+@onready var ignite_btn: Button = (
+	(get_node_or_null(ignite_btn_path) as Button)
+	if not ignite_btn_path.is_empty()
+	else (find_child("IgniteBtn", true, false) as Button)
+)
 
 const HEAT_PULSE_PER_IGNITE: float = 6.0
 const PILLAR_SCENE := preload("res://scenes/ReactionPillar.tscn")
@@ -45,10 +44,10 @@ func _ready() -> void:
 
 	if GS.has_signal("eu_changed"):
 		GS.connect("eu_changed", Callable(self, "_on_eu_bump"))
-	if GS.has_signal("vent_started"):
-		GS.connect("vent_started", Callable(self, "_on_vent_started"))
-	if GS.has_signal("vent_finished"):
-		GS.connect("vent_finished", Callable(self, "_on_vent_finished"))
+	if GS.has_signal("venting_started"):
+		GS.connect("venting_started", Callable(self, "_on_vent_started"))
+	if GS.has_signal("venting_finished"):
+		GS.connect("venting_finished", Callable(self, "_on_vent_finished"))
 	
 	_apply_venting_state()
 	_refresh_buttons()
@@ -99,21 +98,19 @@ func _refresh_buttons() -> void:
 		ignite_btn.disabled = GS.is_venting or (not GS.manual_ignite_enabled)
 	
 	# keep vent button in sync with model even if a signal was missed
-	if "is_venting" in GS:
-		vent_btn.disabled = GS.is_venting
 	if (not GS.has_method("is_venting") or not GS.is_venting):
 		if not _vent_timer or _vent_timer.time_left <= 0.0:
 			vent_btn.text = "VENT"
 
 
 func _on_vent() -> void:
-	print("[UI] Vent button pressed")
+	# print("[UI] Vent button pressed")
 	var gs := get_node_or_null("/root/GameState")
-	print("[UI] GS node =", gs, " id=", (gs and gs.get_instance_id()))
+	# print("[UI] GS node =", gs, " id=", (gs and gs.get_instance_id()))
 	if gs and gs.has_method("start_vent"):
 		gs.start_vent()
-	else:
-		print("[UI] ERROR: '/root/GameState' not found or start_vent missing")
+	# else:
+		# print("[UI] ERROR: '/root/GameState' not found or start_vent missing")
 
 	# start a local timer so we can show a countdown on the button
 	if not _vent_timer:
@@ -121,7 +118,7 @@ func _on_vent() -> void:
 		_vent_timer.one_shot = true
 		add_child(_vent_timer)
 	_vent_timer.stop()
-	_vent_timer.wait_time = 2.0
+	_vent_timer.wait_time = 8.0
 	_vent_timer.start()
 	# connect local timeout once as a safety net, in case the model signal is missed
 	if not _vent_timer.timeout.is_connected(_on_local_vent_timer_timeout):
@@ -129,7 +126,6 @@ func _on_vent() -> void:
 	_vent_timer.start()
 
 func _on_vent_started() -> void:
-	GS.start_vent()
 	if vent_btn:   vent_btn.disabled = true
 	if ignite_btn: ignite_btn.disabled = true
 

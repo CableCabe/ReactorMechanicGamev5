@@ -101,7 +101,7 @@ const IGNITE_HEAT_PULSE: float = 0.3
 
 # VENTING
 const VENT_COOL_PER_SEC: float = 6.5
-const VENT_DURATION_SEC: float = 3.0
+const VENT_DURATION_SEC: float = 8.0
 const VENT_DROP_TOTAL: float = 14.0
 
 var is_venting: bool = false
@@ -109,7 +109,7 @@ var _vent_timer: Timer
 var _vent_cool_remaining: float = 0.0
 var _vent_rate: float = 0.0                 # % points per second during vent
 
-@export var vent_duration: float = 2.0
+@export var vent_duration: float = 8.0
 
 # Fixed‑timestep accumulator (10 Hz)
 const STEP := 0.1
@@ -144,8 +144,8 @@ signal research_loaded
 signal state_changed
 signal eu_changed(value)
 signal heat_changed(value)
-signal vent_started
-signal vent_finished
+signal venting_started
+signal venting_finished
 signal fuel_changed(value)
 signal coolant_changed(value)
 signal pillar_fired(idx: int)
@@ -330,41 +330,30 @@ func heat_rate_mult() -> float:
 
 func start_vent() -> void:
 	# PRINTS FIRST so we see it even if we early-return
-	print("[GS] start_vent requested; is_venting=", is_venting, " duration=", vent_duration)
-	if is_venting:
-		print("[GS] already venting → ignore")
-		return
+	#print("[GS] start_vent requested; is_venting=", is_venting, " duration=", vent_duration)
+	#if is_venting:
+	#	print("[GS] already venting → ignore")
+	#	return
 
 	is_venting = true
 	_auto_ignite_was_enabled = auto_ignite_enabled
 	auto_ignite_enabled = false
 	manual_ignite_enabled = false
-	emit_signal("vent_started")
+	emit_signal("venting_started")
 
 	# start/arm the timer cleanly
 	_vent_timer.stop()
 	_vent_timer.wait_time = max(0.01, vent_duration)
 	_vent_timer.start()
-	print("[GS] vent timer started; time_left=", _vent_timer.time_left)
-
-func start_venting(duration: float = VENT_DURATION_SEC) -> void:
-	if is_venting:
-		return
-	is_venting = true
-	_vent_rate = VENT_DROP_TOTAL / max(duration, 0.001)
-	_vent_cool_remaining = VENT_DROP_TOTAL
-	vent_started.emit()
-	_vent_timer.stop()
-	_vent_timer.wait_time = duration
-	_vent_timer.start()
+	#print("[GS] vent timer started; time_left=", _vent_timer.time_left)
 	
 
 func _on_vent_timeout() -> void:
-	print("[GS] vent finished; time_left=", _vent_timer.time_left)
+	#print("[GS] vent finished; time_left=", _vent_timer.time_left)
 	is_venting = false
 	auto_ignite_enabled = _auto_ignite_was_enabled
 	manual_ignite_enabled = true
-	emit_signal("vent_finished")
+	emit_signal("venting_finished")
 
 
 
@@ -896,6 +885,8 @@ func upgrade_pillar(idx: int) -> void:
 	emit_signal("eu_changed", eu)
 	
 func _tick_pillars(dt: float) -> void:
+	if is_venting:
+		return
 	var count: int = min(PILLAR_COUNT, pillars.size())
 	for i in range(count):
 		var p: Dictionary = pillars[i]

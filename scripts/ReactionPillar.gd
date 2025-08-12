@@ -134,9 +134,6 @@ func _update_timer() -> void:
 	else:
 		_pulse_timer.stop()
 
-func _on_vent_start() -> void:
-	_pulse_timer.stop()
-
 func _on_vent_end() -> void:
 	_update_timer()
 
