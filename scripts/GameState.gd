@@ -538,6 +538,8 @@ func sim_tick(dt: float) -> void:
 		_eu_last_tick = produced_eu
 		_eu_rate_ps = produced_eu / dt
 		if produced_eu > 0.0:
+			_eu_last_tick = produced_eu
+			_eu_rate_ps = produced_eu / dt
 			eu_tick_generated.emit(_eu_last_tick)
 			eu_rate_changed.emit(_eu_rate_ps)
 

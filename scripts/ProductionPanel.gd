@@ -5,9 +5,7 @@ extends PanelContainer
 @onready var GS = get_node("/root/GameState")
 
 @export var vent_btn_path: NodePath
-#@onready var vent_btn: Button = get_node(vent_btn_path)
 @export var ignite_btn_path: NodePath
-#@onready var ignite_btn: Button = get_node(ignite_btn_path)
 
 @onready var vent_btn: Button = %VentBtn
 
@@ -36,15 +34,6 @@ func _connect_once(btn: Button, method_name: String) -> void:
 
 func _ready() -> void:
 	
-#	if ignite_btn == null or vent_btn == null:
-#		print("Ignite or Vent button is null — check NodePaths or names.")
-#	else:
-#		if ignite_btn == vent_btn:
-#			print("ignite_btn and vent_btn refer to the SAME control! Fix NodePaths or duplicate names.")
-#			# Hard fail to avoid hidden coupling
-#			ignite_btn.mouse_filter = Control.MOUSE_FILTER_IGNORE
-#			vent_btn.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	
 	_connect_once(ignite_upgrade_btn, "_on_ignite_upgrade")
 
 	if ignite_btn:
@@ -72,13 +61,6 @@ func _ready() -> void:
 	_build_pillars()
 	_sync_from_model()
 	
-#	if ignite_btn:
-#		ignite_btn.pressed.connect(func():
-#			print("[DBG] IGNITE pressed id=", ignite_btn.get_instance_id(), " name=", ignite_btn.name))
-#	if vent_btn:
-#		vent_btn.pressed.connect(func():
-#			print("[DBG] VENT pressed id=", vent_btn.get_instance_id(), " name=", vent_btn.name))
-	
 func _process(_delta: float) -> void:
 	if vent_btn and _vent_timer and _vent_timer.is_inside_tree():
 		var left: float = _vent_timer.time_left
@@ -95,7 +77,6 @@ func _sync_from_model() -> void:
 	_ui_syncing = false
 
 func _clean_button_connections(btn: Button, target: Callable) -> void:
-	# Remove accidental duplicate/miswired connections before re-adding
 	if btn.pressed.is_connected(target):
 		btn.pressed.disconnect(target)
 

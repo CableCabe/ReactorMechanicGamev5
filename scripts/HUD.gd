@@ -5,10 +5,12 @@ extends HBoxContainer
 @onready var eu_label: Label    = $EuLabel
 @onready var money_label: Label = $MoneyLabel
 
+
 # Optional: set this in the Inspector; if blank we’ll try %EURateLabel, then deep search.
 @export var eu_rate_label_path: NodePath
 var EURateLabel: Label = null
 
+var _ept_samples: Array = []
 var _accum := 0.0
 var _warned := false
 var _dbg_once := true
@@ -32,6 +34,13 @@ func _ready() -> void:
 		GS.eu_changed.connect(func(_v): _refresh_numbers())
 	if GS.has_signal("money_changed"):
 		GS.money_changed.connect(func(_v): _refresh_numbers())
+		
+	if GS.has_signal("eu_tick_generated"):
+		GS.eu_tick_generated.connect(func(amount: float) -> void:
+			# keep samples in sync if you chose the smoothed option
+			_push_ept(amount)
+			if EURateLabel:
+				EURateLabel.text = "%0.2f Eu/tick" % (amount))
 
 	set_process(true)
 
@@ -52,6 +61,18 @@ func _refresh_rate() -> void:
 	var ept: float = 0.0
 	if GS.has_method("get_eu_last_tick"):
 		ept = float(GS.get_eu_last_tick())
-
+	_push_ept(ept)
 	if EURateLabel:
-		EURateLabel.text = "%0.2f Eu/tick" % ept
+		EURateLabel.text = "%0.2f Eu/tick" % _avg_ept()
+
+func _push_ept(v: float) -> void:
+	if v <= 0.0: return
+	_ept_samples.append(v)
+	if _ept_samples.size() > 5:
+		_ept_samples.pop_front()
+
+func _avg_ept() -> float:
+	if _ept_samples.is_empty(): return 0.0
+	var s := 0.0
+	for x in _ept_samples: s += float(x)
+	return s / float(_ept_samples.size())
