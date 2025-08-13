@@ -648,8 +648,6 @@ func spend_money(cost: float) -> bool:
 
 func set_market_auto_sell(on: bool) -> void:
 	market_auto_sell = on
-	if MKT_DEBUG:
-		print("AUTO-SELL -> ", market_auto_sell)
 
 func sell_eu(amount: float, force: bool = false) -> float:
 	if not force and not market_auto_sell:
@@ -664,8 +662,6 @@ func sell_eu(amount: float, force: bool = false) -> float:
 	eu_changed.emit(eu)
 	var earned: float = a * SELL_EU_RATE
 	add_money(earned)
-	if MKT_DEBUG:
-		print("SOLD ", a, " Eu -> $", earned, " (eu now ", eu, ")")
 	return earned
 
 func _on_market_timeout() -> void:

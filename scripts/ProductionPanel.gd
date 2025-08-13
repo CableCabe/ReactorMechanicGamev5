@@ -26,6 +26,14 @@ var ignite_upgrade_cost: float = 50.0
 var ignite_cost_mult: float = 1.6
 var _vent_timer: Timer
 
+func _connect_once(btn: Button, method_name: String) -> void:
+	if btn == null:
+		return
+	var callable := Callable(self, method_name)
+	if btn.pressed.is_connected(callable):
+		btn.pressed.disconnect(callable)
+	btn.pressed.connect(callable)
+
 func _ready() -> void:
 	
 #	if ignite_btn == null or vent_btn == null:
@@ -36,7 +44,8 @@ func _ready() -> void:
 #			# Hard fail to avoid hidden coupling
 #			ignite_btn.mouse_filter = Control.MOUSE_FILTER_IGNORE
 #			vent_btn.mouse_filter = Control.MOUSE_FILTER_IGNORE
-
+	
+	_connect_once(ignite_upgrade_btn, "_on_ignite_upgrade")
 
 	if ignite_btn:
 		_clean_button_connections(ignite_btn, Callable(self, "_on_vent"))
@@ -128,10 +137,17 @@ func _ignite_delta() -> float:
 	return ignite_base + float(ignite_level)
 
 func _on_ignite_upgrade() -> void:
-	if GS.spend_eu(ignite_upgrade_cost):
-		ignite_level += 1
-		ignite_upgrade_cost = ceil(ignite_upgrade_cost * ignite_cost_mult)
-		_refresh_buttons_text_only()	
+	# Guard: need a valid button and enough Eu
+	if ignite_upgrade_btn == null:
+		return
+	if not GS.spend_eu(ignite_upgrade_cost):
+		return
+
+	# Apply upgrade
+	ignite_level += 1
+	ignite_upgrade_cost = ceil(ignite_upgrade_cost * ignite_cost_mult)
+	
+	_refresh_buttons_text_only()
 
 func _on_eu_bump(_v := 0.0) -> void:
 	
