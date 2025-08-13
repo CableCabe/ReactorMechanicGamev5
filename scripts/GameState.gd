@@ -20,6 +20,8 @@ var eu: float:
 var money: float = 0.0
 var flags: Dictionary = {"auto_sell_ratio": 0.01}
 var _in_pillar_tick := false  # set around the central pillar loop
+var _eu_last_tick: float = 0.0
+var _eu_rate_ps: float = 0.0
 
 const FUEL_TO_EU := 18.0
 const BASE_EU_S := 1.0
@@ -108,7 +110,7 @@ const VENT_DROP_TOTAL: float = 14.0
 var is_venting: bool = false
 var _vent_timer: Timer
 var _vent_cool_remaining: float = 0.0
-var _vent_rate: float = 0.0                 # % points per second during vent
+var _vent_rate: float = 0.0
 
 @export var vent_duration: float = 8.0
 
@@ -153,6 +155,8 @@ signal pillar_fired(idx: int)
 signal money_changed(value)
 signal fuel_empty
 signal pillar_no_fuel(pillar_path: NodePath)
+signal eu_tick_generated(amount: float)   # Eu produced this sim tick (pillars only)
+signal eu_rate_changed(per_sec: float)    # instantaneous Eu/s based on last tick
 
 
 # ---- DEBUG ----
@@ -330,19 +334,43 @@ func heat_rate_mult() -> float:
 # ---- VENTING ----
 
 func start_vent() -> void:
-	if is_venting: return
+	# prevent re-entry if already venting or timer active
+	if is_venting:
+		return
+	if _vent_timer and _vent_timer.time_left > 0.0:
+		return
+
 	is_venting = true
 	_auto_ignite_was_enabled = auto_ignite_enabled
 	auto_ignite_enabled = false
 	manual_ignite_enabled = false
+
+	# planned total drop over duration -> per-second rate
+	_vent_cool_remaining = max(0.0, VENT_DROP_TOTAL)
+	_vent_rate = 0.0
+	if vent_duration > 0.0:
+		_vent_rate = VENT_DROP_TOTAL / vent_duration
+
 	emit_signal("venting_started")
-	get_tree().call_group("reaction_pillars", "_vent_lock")   # <—
+	get_tree().call_group("reaction_pillars", "_vent_lock")
+
+	if not _vent_timer:
+		_vent_timer = Timer.new()
+		_vent_timer.one_shot = true
+		add_child(_vent_timer)
+		_vent_timer.timeout.connect(_on_vent_timeout)
+
 	_vent_timer.stop()
 	_vent_timer.wait_time = max(0.01, vent_duration)
 	_vent_timer.start()
 
 func _on_vent_timeout() -> void:
+	# finish only once
+	if not is_venting:
+		return
 	is_venting = false
+	_vent_cool_remaining = 0.0
+	_vent_rate = 0.0
 	auto_ignite_enabled = _auto_ignite_was_enabled
 	manual_ignite_enabled = true
 	emit_signal("venting_finished")
@@ -498,11 +526,16 @@ func sim_tick(dt: float) -> void:
 		if fired:
 			emit_signal("pillar_fired", i)
 
+	if dt > 0.0:
+		total_heat_s += heat_pulse / dt
+		_eu_last_tick = produced_eu
+		_eu_rate_ps = produced_eu / dt
+		eu_tick_generated.emit(_eu_last_tick)
+		eu_rate_changed.emit(_eu_rate_ps)
+
 	if produced_eu > 0.0:
 		add_eu(produced_eu, "pillar_sim")   # reason starts with "pillar_…" if you prefer
 
-	if dt > 0.0:
-		total_heat_s += heat_pulse / dt
 
 	# Vent cooling happens AFTER (and now there’s no production during vent)
 	if is_venting:
@@ -510,8 +543,11 @@ func sim_tick(dt: float) -> void:
 		if step > _vent_cool_remaining:
 			step = _vent_cool_remaining
 		_vent_cool_remaining -= step
-		set_heat(heat - step)
-		return
+		set_heat(heat - step)  # setter so UI updates
+		if _vent_cool_remaining <= 0.0:
+			_on_vent_timeout()
+		return  # skip normal cooling and pillar effects while venting
+
 		
 
 	# cooling & heat application
@@ -528,7 +564,7 @@ func sim_tick(dt: float) -> void:
 
 	if not market_auto_sell and _count_enabled_pillars() == 0:
 		if eu < _eu_prev - 0.01 and _eu_leak_logs_left > 0:
-			print("EU LEAK: Δ=", eu - _eu_prev, " heat=", heat, " money=", money)
+			#print("EU LEAK: Δ=", eu - _eu_prev, " heat=", heat, " money=", money)
 			_eu_leak_logs_left -= 1
 	_eu_prev = eu	
 	
@@ -581,6 +617,11 @@ func pay(cost: Dictionary) -> void:
 	if cost.has("money"):
 		money -= float(cost["money"])
 
+func get_eu_last_tick() -> float:
+	return _eu_last_tick
+
+func get_eu_rate_ps() -> float:
+	return _eu_rate_ps
 
 
 # ---- MARKET ----

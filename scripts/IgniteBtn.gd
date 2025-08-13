@@ -12,7 +12,10 @@ func _ready() -> void:
 	_sync_from_state()
 
 func _pressed() -> void:
-	if GS.is_venting: return
+	if GS.is_venting: 
+		return
+	else:
+		GS.start_vent()
 	if not GS.manual_ignite_enabled: return
 	get_tree().call_group("reaction_pillars", "manual_ignite")
 

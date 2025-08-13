@@ -63,14 +63,14 @@ func _process(delta: float) -> void:
 			vent_btn.text = "VENT"
 
 func _on_ignite() -> void:
-	# Spend a little fuel and add EU using your heat multiplier if desired
+	if GS.is_venting or (not GS.manual_ignite_enabled):
+		return
 	if GS.coolant < GS.COOLANT_PER_IGNITE:
 		return
 	if GS.has_method("add_fuel"):
 		GS.add_fuel(-GS.FUEL_PER_IGNITE)
 	if GS.has_method("add_coolant"):
 		GS.add_coolant(-GS.COOLANT_PER_IGNITE)
-	
 	var mult: float = GS.heat_rate_mult()
 	GS.add_eu(_ignite_delta() * mult)
 	GS.add_heat_pulse(GS.IGNITE_HEAT_PULSE)
@@ -104,23 +104,20 @@ func _refresh_buttons() -> void:
 
 
 func _on_vent() -> void:
-	# print("[UI] Vent button pressed")
+	if GS.is_venting:
+		return
+	if vent_btn:
+		vent_btn.disabled = true  # immediate UI feedback
 	var gs := get_node_or_null("/root/GameState")
-	# print("[UI] GS node =", gs, " id=", (gs and gs.get_instance_id()))
 	if gs and gs.has_method("start_vent"):
 		gs.start_vent()
-	# else:
-		# print("[UI] ERROR: '/root/GameState' not found or start_vent missing")
-
-	# start a local timer so we can show a countdown on the button
+	# local countdown timer (unchanged)
 	if not _vent_timer:
 		_vent_timer = Timer.new()
 		_vent_timer.one_shot = true
 		add_child(_vent_timer)
 	_vent_timer.stop()
-	_vent_timer.wait_time = 8.0
-	_vent_timer.start()
-	# connect local timeout once as a safety net, in case the model signal is missed
+	_vent_timer.wait_time = float(GS.vent_duration)
 	if not _vent_timer.timeout.is_connected(_on_local_vent_timer_timeout):
 		_vent_timer.timeout.connect(_on_local_vent_timer_timeout)
 	_vent_timer.start()
@@ -130,9 +127,9 @@ func _on_vent_started() -> void:
 	if ignite_btn: ignite_btn.disabled = true
 
 func _on_vent_finished() -> void:
-	vent_btn.disabled = false
-	vent_btn.text = "VENT"
 	_apply_venting_state()
+	if vent_btn:
+		vent_btn.text = "VENT"
 
 func _on_local_vent_timer_timeout() -> void:
 	# Fallback UI sync: if GameState is still venting, stay disabled; else re-enable
@@ -145,9 +142,9 @@ func _on_local_vent_timer_timeout() -> void:
 
 func _apply_venting_state() -> void:
 	if vent_btn:
-		vent_btn.disabled = GameState.is_venting
+		vent_btn.disabled = GS.is_venting
 	if ignite_btn:
-		ignite_btn.disabled = GameState.is_venting or (not GameState.manual_ignite_enabled)
+		ignite_btn.disabled = GS.is_venting or (not GS.manual_ignite_enabled)
 
 func _build_pillars() -> void:
 	# clear grid
