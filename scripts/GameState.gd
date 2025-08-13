@@ -5,9 +5,7 @@ extends Node
 
 # DEBUG
 
-const MKT_DEBUG: bool = true
-var _eu_prev: float = 0.0
-var _eu_leak_logs_left: int = 20
+
 
 # CURRENCY:
 var _eu: float = 0.0
@@ -572,11 +570,9 @@ func sim_tick(dt: float) -> void:
 	
 # DEBUG
 
-	if not market_auto_sell and _count_enabled_pillars() == 0:
-		if eu < _eu_prev - 0.01 and _eu_leak_logs_left > 0:
-			#print("EU LEAK: Δ=", eu - _eu_prev, " heat=", heat, " money=", money)
-			_eu_leak_logs_left -= 1
-	_eu_prev = eu	
+
+
+
 	
 func _count_enabled_pillars() -> int:
 	var c: int = 0
@@ -662,8 +658,6 @@ func set_market_auto_sell(on: bool) -> void:
 
 func sell_eu(amount: float, force: bool = false) -> float:
 	if not force and not market_auto_sell:
-		if MKT_DEBUG:
-			print("sell_eu ignored (auto-sell OFF), amount=", amount)
 		return 0.0
 
 	var a: float = clamp(amount, 0.0, eu)
@@ -680,8 +674,6 @@ func _on_market_timeout() -> void:
 		return
 	var dt: float = _market_timer.wait_time
 	var to_sell: float = AUTO_SELL_RATE_EU_PER_SEC * dt
-	if MKT_DEBUG:
-		print("AUTO-SELL tick -> request ", to_sell, " Eu")
 	sell_eu(to_sell)   # flag-gated by sell_eu itself
 
 

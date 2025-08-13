@@ -37,6 +37,7 @@ custom_minimum_size = Vector2(0, 32)
 layout_mode = 2
 theme_override_constants/separation = 12
 script = ExtResource("2_y18xa")
+eu_rate_label_path = NodePath("EuRateLabel")
 
 [node name="Spacer" type="Control" parent="VBoxContainer/PanelContainer/HEADER/TopBar"]
 layout_mode = 2
