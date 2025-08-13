@@ -1,24 +1,20 @@
-# ReactorView.gd — sidebar counters + live progress bars with color states
-# Assign the exported NodePaths in the Inspector to your right-justified labels
-# and to the three ProgressBars for Fuel, Coolant, and Heat.
 
 extends PanelContainer
 
-@export var fuel_value_path: NodePath
-@export var coolant_value_path: NodePath
-@export var heat_value_path: NodePath      # optional, numeric % label next to HEAT
+@onready var fuel_value: Label    = %FStorLabel
+@onready var coolant_value: Label = %CStorLabel
+@onready var heat_value: Label    = %HStorLabel
 
-@export var fuel_bar_path: NodePath
-@export var coolant_bar_path: NodePath
-@export var heat_bar_path: NodePath
-
-@onready var fuel_value: Label    = get_node(fuel_value_path) as Label
-@onready var coolant_value: Label = get_node(coolant_value_path) as Label
-@onready var heat_value: Label    = get_node_or_null(heat_value_path) as Label
-
-@onready var fuel_bar: ProgressBar    = get_node(fuel_bar_path) as ProgressBar
-@onready var coolant_bar: ProgressBar = get_node(coolant_bar_path) as ProgressBar
+@onready var fuel_bar: ProgressBar    = %FuelBar
+@onready var coolant_bar: ProgressBar = %CoolBar
 @onready var heat_bar: ProgressBar    = %HeatBar
+
+@onready var fuel_drain: Label    = %FDrainLabel
+@onready var coolant_drain: Label = %CDrainLabel
+
+@onready var fuel_warn: Label    = %FWarningLabel
+@onready var coolant_warn: Label = %CWarningLabel
+@onready var heat_warn: Label    = %HWarningLabel
 
 @onready var warnings: WarningsPanel = %WarningsPanel
 @onready var GS = get_node("/root/GameState")
@@ -28,6 +24,8 @@ const GREEN_MIN := 0.25
 const YELLOW_MIN := 0.10
 
 var _acc: float = 0.0
+var _prev_fuel: float = 0.0
+var _prev_coolant: float = 0.0
 
 func _ready() -> void:
 	set_process(true)
@@ -56,6 +54,10 @@ func _ready() -> void:
 		GS.coolant_changed.connect(_on_coolant_changed)
 	if GS.has_signal("heat_changed"):
 		GS.heat_changed.connect(_on_heat_changed)
+	
+	_prev_fuel = GS.fuel
+	_prev_coolant = GS.coolant
+	
 	_on_heat_changed(GS.heat)
 	_on_fuel_changed(GS.fuel)
 	_on_coolant_changed(GS.coolant)
@@ -63,9 +65,9 @@ func _ready() -> void:
 	_refresh()
 	
 	if warnings:
-		warnings.register_system("heat",    $WarningsPanel/VBoxContainer/RowHeat)
-		warnings.register_system("fuel",    $WarningsPanel/VBoxContainer/RowFuel)
-		warnings.register_system("cooling", $WarningsPanel/VBoxContainer/RowCoolant)
+		warnings.register_system("heat",    $ReactorView/MarginContainer/VBoxContainer/HeatPanel)
+		warnings.register_system("fuel",    $ReactorView/MarginContainer/VBoxContainer/FuelPanel)
+		warnings.register_system("cooling", $ReactorView/MarginContainer/VBoxContainer/CoolPanel)
 		warnings.hook_standard_events()  # wires HEAT (venting) + FUEL
 		
 	# TEMP: prove UI shows — remove after you see it
@@ -73,16 +75,16 @@ func _ready() -> void:
 	
 	if warnings != null and warnings.has_method("add_light"):
 		# Update these child paths to your actual rows under the warnings panel
-		var row_heat := warnings.get_node_or_null("VBoxContainer/RowHeat")
-		var row_fuel := warnings.get_node_or_null("VBoxContainer/RowFuel")
-		var row_cooling := warnings.get_node_or_null("VBoxContainer/RowCooling")
+		var row_heat := warnings.get_node_or_null("VBoxContainer/HeatPanel")
+		var row_fuel := warnings.get_node_or_null("VBoxContainer/FuelPanel")
+		var row_cooling := warnings.get_node_or_null("VBoxContainer/CoolPanel")
 		if row_heat != null:
 			warnings.call("add_light", "heat", row_heat)
 		if row_fuel != null:
 			warnings.call("add_light", "fuel", row_fuel)
 		if row_cooling != null:
 			warnings.call("add_light", "cooling", row_cooling)
-		warnings.call("hook_standard_events")  # wires HEAT (venting) + FUEL
+		warnings.call("hook_standard_events")
 
 func set_cooling_warning(on: bool, text: String) -> void:
 	if warnings != null and warnings.has_method("set_cooling"):
@@ -91,12 +93,9 @@ func set_cooling_warning(on: bool, text: String) -> void:
 var _dbg_left := 10
 
 func _on_heat_changed(v: float) -> void:
-	# print("UI HEAT -> ", v)
-	
 	var hp: float
 	if _dbg_left > 0:
 		_dbg_left -= 1
-		# print("heat_changed -> ", v)
 	if v > 1.0:
 		hp = clamp(v / 100.0, 0.0, 1.0)
 	else:
@@ -106,15 +105,33 @@ func _on_heat_changed(v: float) -> void:
 		heat_bar.value = hv
 		_tint_progress_bar(heat_bar, _color_by_pct(hp, true))
 
+func _update_drain_label(lbl: Label, prev_value: float, new_value: float, unit: String) -> float:
+	var diff: float = prev_value - new_value
+	if lbl:
+		if diff > 0.0:
+			lbl.text = "-%0.2f %s/tick" % [diff, unit]
+		elif diff < 0.0:
+			lbl.text = "+%0.2f %s/tick" % [abs(diff), unit]
+		else:
+			lbl.text = "0.00 %s/tick" % unit
+	return new_value
+
 func _on_fuel_changed(v: float) -> void:
-	if fuel_value: fuel_value.text = "%0.0f ml" % v
+	# update drain label first, then UI text/bar
+	_prev_fuel = _update_drain_label(fuel_drain, _prev_fuel, v, "ml")
+
+	if fuel_value:
+		fuel_value.text = "%0.0f ml" % v
 	if fuel_bar:
 		fuel_bar.max_value = GS.fuel_cap
 		fuel_bar.value = clamp(v, 0.0, GS.fuel_cap)
 		_tint_progress_bar(fuel_bar, _color_by_pct(v / max(1.0, GS.fuel_cap), false))
 
 func _on_coolant_changed(v: float) -> void:
-	if coolant_value: coolant_value.text = "%0.0f ml" % v
+	_prev_coolant = _update_drain_label(coolant_drain, _prev_coolant, v, "ml")
+
+	if coolant_value:
+		coolant_value.text = "%0.0f ml" % v
 	if coolant_bar:
 		coolant_bar.max_value = GS.coolant_cap
 		coolant_bar.value = clamp(v, 0.0, GS.coolant_cap)

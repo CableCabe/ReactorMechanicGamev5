@@ -50,26 +50,32 @@ size_flags_horizontal = 3
 alignment = 1
 
 [node name="FLight 1" type="ColorRect" parent="MarginContainer/VBoxContainer/VBoxContainer/FuelPanel/PanelContainer/LightPanel"]
+unique_name_in_owner = true
 custom_minimum_size = Vector2(10, 10)
 layout_mode = 2
 
 [node name="FLight 2" type="ColorRect" parent="MarginContainer/VBoxContainer/VBoxContainer/FuelPanel/PanelContainer/LightPanel"]
+unique_name_in_owner = true
 custom_minimum_size = Vector2(10, 10)
 layout_mode = 2
 
 [node name="FLight 3" type="ColorRect" parent="MarginContainer/VBoxContainer/VBoxContainer/FuelPanel/PanelContainer/LightPanel"]
+unique_name_in_owner = true
 custom_minimum_size = Vector2(10, 10)
 layout_mode = 2
 
 [node name="FLight 4" type="ColorRect" parent="MarginContainer/VBoxContainer/VBoxContainer/FuelPanel/PanelContainer/LightPanel"]
+unique_name_in_owner = true
 custom_minimum_size = Vector2(10, 10)
 layout_mode = 2
 
 [node name="FLight 5" type="ColorRect" parent="MarginContainer/VBoxContainer/VBoxContainer/FuelPanel/PanelContainer/LightPanel"]
+unique_name_in_owner = true
 custom_minimum_size = Vector2(10, 10)
 layout_mode = 2
 
 [node name="FLight 6" type="ColorRect" parent="MarginContainer/VBoxContainer/VBoxContainer/FuelPanel/PanelContainer/LightPanel"]
+unique_name_in_owner = true
 custom_minimum_size = Vector2(10, 10)
 layout_mode = 2
 
@@ -94,6 +100,7 @@ text = "Fuel Status"
 layout_mode = 2
 
 [node name="FDrainLabel" type="Label" parent="MarginContainer/VBoxContainer/VBoxContainer/FuelPanel/ContentPanel/VBoxContainer/HBoxContainer"]
+unique_name_in_owner = true
 layout_mode = 2
 theme_override_font_sizes/font_size = 10
 text = "Drain: 0.00/t"
@@ -103,12 +110,14 @@ layout_mode = 2
 size_flags_horizontal = 3
 
 [node name="FStorLabel" type="Label" parent="MarginContainer/VBoxContainer/VBoxContainer/FuelPanel/ContentPanel/VBoxContainer/HBoxContainer"]
+unique_name_in_owner = true
 layout_mode = 2
 theme_override_font_sizes/font_size = 10
 text = "0.00 ml/1000 ml"
 horizontal_alignment = 2
 
 [node name="FuelBar" type="ProgressBar" parent="MarginContainer/VBoxContainer/VBoxContainer/FuelPanel/ContentPanel"]
+unique_name_in_owner = true
 layout_mode = 2
 
 [node name="ScrollContainer" type="ScrollContainer" parent="MarginContainer/VBoxContainer/VBoxContainer/FuelPanel/ContentPanel"]
@@ -118,6 +127,7 @@ horizontal_scroll_mode = 3
 vertical_scroll_mode = 0
 
 [node name="FWarningLabel" type="Label" parent="MarginContainer/VBoxContainer/VBoxContainer/FuelPanel/ContentPanel/ScrollContainer"]
+unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
@@ -144,26 +154,32 @@ size_flags_horizontal = 3
 alignment = 1
 
 [node name="CLight 1" type="ColorRect" parent="MarginContainer/VBoxContainer/VBoxContainer/CoolantPanel/PanelContainer/LightPanel"]
+unique_name_in_owner = true
 custom_minimum_size = Vector2(10, 10)
 layout_mode = 2
 
 [node name="CLight 2" type="ColorRect" parent="MarginContainer/VBoxContainer/VBoxContainer/CoolantPanel/PanelContainer/LightPanel"]
+unique_name_in_owner = true
 custom_minimum_size = Vector2(10, 10)
 layout_mode = 2
 
 [node name="CLight 3" type="ColorRect" parent="MarginContainer/VBoxContainer/VBoxContainer/CoolantPanel/PanelContainer/LightPanel"]
+unique_name_in_owner = true
 custom_minimum_size = Vector2(10, 10)
 layout_mode = 2
 
 [node name="CLight 4" type="ColorRect" parent="MarginContainer/VBoxContainer/VBoxContainer/CoolantPanel/PanelContainer/LightPanel"]
+unique_name_in_owner = true
 custom_minimum_size = Vector2(10, 10)
 layout_mode = 2
 
 [node name="CLight 5" type="ColorRect" parent="MarginContainer/VBoxContainer/VBoxContainer/CoolantPanel/PanelContainer/LightPanel"]
+unique_name_in_owner = true
 custom_minimum_size = Vector2(10, 10)
 layout_mode = 2
 
 [node name="CLight 6" type="ColorRect" parent="MarginContainer/VBoxContainer/VBoxContainer/CoolantPanel/PanelContainer/LightPanel"]
+unique_name_in_owner = true
 custom_minimum_size = Vector2(10, 10)
 layout_mode = 2
 
@@ -188,6 +204,7 @@ text = "Coolant Status"
 layout_mode = 2
 
 [node name="CDrainLabel" type="Label" parent="MarginContainer/VBoxContainer/VBoxContainer/CoolantPanel/ContentPanel/VBoxContainer/HBoxContainer"]
+unique_name_in_owner = true
 layout_mode = 2
 theme_override_font_sizes/font_size = 10
 text = "Drain: 0.00/t"
@@ -197,12 +214,14 @@ layout_mode = 2
 size_flags_horizontal = 3
 
 [node name="CStorLabel" type="Label" parent="MarginContainer/VBoxContainer/VBoxContainer/CoolantPanel/ContentPanel/VBoxContainer/HBoxContainer"]
+unique_name_in_owner = true
 layout_mode = 2
 theme_override_font_sizes/font_size = 10
 text = "0.00 ml/1000 ml"
 horizontal_alignment = 2
 
 [node name="CoolBar" type="ProgressBar" parent="MarginContainer/VBoxContainer/VBoxContainer/CoolantPanel/ContentPanel"]
+unique_name_in_owner = true
 layout_mode = 2
 
 [node name="ScrollContainer" type="ScrollContainer" parent="MarginContainer/VBoxContainer/VBoxContainer/CoolantPanel/ContentPanel"]
@@ -212,6 +231,7 @@ horizontal_scroll_mode = 3
 vertical_scroll_mode = 0
 
 [node name="CWarningLabel" type="Label" parent="MarginContainer/VBoxContainer/VBoxContainer/CoolantPanel/ContentPanel/ScrollContainer"]
+unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
@@ -238,26 +258,32 @@ size_flags_horizontal = 3
 alignment = 1
 
 [node name="HLight 1" type="ColorRect" parent="MarginContainer/VBoxContainer/VBoxContainer/HeatPanel/PanelContainer/LightPanel"]
+unique_name_in_owner = true
 custom_minimum_size = Vector2(10, 10)
 layout_mode = 2
 
 [node name="HLight 2" type="ColorRect" parent="MarginContainer/VBoxContainer/VBoxContainer/HeatPanel/PanelContainer/LightPanel"]
+unique_name_in_owner = true
 custom_minimum_size = Vector2(10, 10)
 layout_mode = 2
 
 [node name="HLight 3" type="ColorRect" parent="MarginContainer/VBoxContainer/VBoxContainer/HeatPanel/PanelContainer/LightPanel"]
+unique_name_in_owner = true
 custom_minimum_size = Vector2(10, 10)
 layout_mode = 2
 
 [node name="HLight 4" type="ColorRect" parent="MarginContainer/VBoxContainer/VBoxContainer/HeatPanel/PanelContainer/LightPanel"]
+unique_name_in_owner = true
 custom_minimum_size = Vector2(10, 10)
 layout_mode = 2
 
 [node name="HLight 5" type="ColorRect" parent="MarginContainer/VBoxContainer/VBoxContainer/HeatPanel/PanelContainer/LightPanel"]
+unique_name_in_owner = true
 custom_minimum_size = Vector2(10, 10)
 layout_mode = 2
 
 [node name="HLight 6" type="ColorRect" parent="MarginContainer/VBoxContainer/VBoxContainer/HeatPanel/PanelContainer/LightPanel"]
+unique_name_in_owner = true
 custom_minimum_size = Vector2(10, 10)
 layout_mode = 2
 
@@ -286,12 +312,14 @@ layout_mode = 2
 size_flags_horizontal = 3
 
 [node name="HTempLabel" type="Label" parent="MarginContainer/VBoxContainer/VBoxContainer/HeatPanel/ContentPanel/VBoxContainer/HBoxContainer"]
+unique_name_in_owner = true
 layout_mode = 2
 theme_override_font_sizes/font_size = 10
 text = "100°"
 horizontal_alignment = 2
 
-[node name="CoolBar" type="ProgressBar" parent="MarginContainer/VBoxContainer/VBoxContainer/HeatPanel/ContentPanel"]
+[node name="HeatBar" type="ProgressBar" parent="MarginContainer/VBoxContainer/VBoxContainer/HeatPanel/ContentPanel"]
+unique_name_in_owner = true
 layout_mode = 2
 
 [node name="ScrollContainer" type="ScrollContainer" parent="MarginContainer/VBoxContainer/VBoxContainer/HeatPanel/ContentPanel"]
@@ -300,7 +328,8 @@ size_flags_vertical = 3
 horizontal_scroll_mode = 3
 vertical_scroll_mode = 0
 
-[node name="CWarningLabel" type="Label" parent="MarginContainer/VBoxContainer/VBoxContainer/HeatPanel/ContentPanel/ScrollContainer"]
+[node name="HWarningLabel" type="Label" parent="MarginContainer/VBoxContainer/VBoxContainer/HeatPanel/ContentPanel/ScrollContainer"]
+unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
