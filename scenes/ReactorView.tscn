@@ -1,18 +1,11 @@
-[gd_scene load_steps=3 format=3 uid="uid://c74yjt60am62e"]
+[gd_scene load_steps=2 format=3 uid="uid://c74yjt60am62e"]
 
 [ext_resource type="Script" path="res://scripts/ReactorView.gd" id="1_i5bm2"]
-[ext_resource type="Script" path="res://scripts/WarningsPanel.gd" id="2_n1bl1"]
 
 [node name="ReactorView" type="PanelContainer"]
 offset_right = 240.0
 offset_bottom = 647.0
 script = ExtResource("1_i5bm2")
-fuel_value_path = NodePath("MarginContainer/VBoxContainer/FuelText/FuelValue")
-coolant_value_path = NodePath("MarginContainer/VBoxContainer/CoolantText/CoolantValue")
-heat_value_path = NodePath("MarginContainer/VBoxContainer/HeatText/HeatValue")
-fuel_bar_path = NodePath("MarginContainer/VBoxContainer/FuelBar")
-coolant_bar_path = NodePath("MarginContainer/VBoxContainer/CoolantBar")
-heat_bar_path = NodePath("MarginContainer/VBoxContainer/HeatBar")
 
 [node name="MarginContainer" type="MarginContainer" parent="."]
 layout_mode = 2
@@ -20,152 +13,299 @@ layout_mode = 2
 [node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
 layout_mode = 2
 
-[node name="Title" type="Label" parent="MarginContainer/VBoxContainer"]
+[node name="PanelContainer" type="PanelContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/PanelContainer"]
+custom_minimum_size = Vector2(0, 175)
+layout_mode = 2
+
+[node name="Title" type="Label" parent="MarginContainer/VBoxContainer/PanelContainer/VBoxContainer"]
 layout_mode = 2
 text = "Reactor"
 
-[node name="Reactor" type="ColorRect" parent="MarginContainer/VBoxContainer"]
+[node name="Reactor" type="ColorRect" parent="MarginContainer/VBoxContainer/PanelContainer/VBoxContainer"]
 custom_minimum_size = Vector2(240, 140)
 layout_mode = 2
 color = Color(0.207843, 0.207843, 0.329412, 1)
 
-[node name="Control" type="Control" parent="MarginContainer/VBoxContainer"]
-custom_minimum_size = Vector2(0, 5)
-layout_mode = 2
-
-[node name="FuelText" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
-layout_mode = 2
-
-[node name="Spacer2" type="Control" parent="MarginContainer/VBoxContainer/FuelText"]
-custom_minimum_size = Vector2(5, 0)
-layout_mode = 2
-
-[node name="FuelLabel" type="Label" parent="MarginContainer/VBoxContainer/FuelText"]
-layout_mode = 2
-size_flags_horizontal = 3
-text = "FUEL"
-
-[node name="FuelValue" type="Label" parent="MarginContainer/VBoxContainer/FuelText"]
-layout_mode = 2
-text = "0 ml"
-
-[node name="Spacer" type="Control" parent="MarginContainer/VBoxContainer/FuelText"]
-custom_minimum_size = Vector2(5, 0)
-layout_mode = 2
-
-[node name="FuelBar" type="ProgressBar" parent="MarginContainer/VBoxContainer"]
-layout_mode = 2
-
-[node name="CoolantText" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
-layout_mode = 2
-
-[node name="Spacer3" type="Control" parent="MarginContainer/VBoxContainer/CoolantText"]
-custom_minimum_size = Vector2(5, 0)
-layout_mode = 2
-
-[node name="CoolantLabel" type="Label" parent="MarginContainer/VBoxContainer/CoolantText"]
-layout_mode = 2
-size_flags_horizontal = 3
-text = "COOLANT"
-
-[node name="CoolantValue" type="Label" parent="MarginContainer/VBoxContainer/CoolantText"]
-layout_mode = 2
-text = "0 ml"
-
-[node name="Control3" type="Control" parent="MarginContainer/VBoxContainer/CoolantText"]
-custom_minimum_size = Vector2(5, 0)
-layout_mode = 2
-
-[node name="CoolantBar" type="ProgressBar" parent="MarginContainer/VBoxContainer"]
-layout_mode = 2
-
-[node name="HeatText" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
-layout_mode = 2
-
-[node name="Spacer4" type="Control" parent="MarginContainer/VBoxContainer/HeatText"]
-custom_minimum_size = Vector2(5, 0)
-layout_mode = 2
-
-[node name="HeatLabel" type="Label" parent="MarginContainer/VBoxContainer/HeatText"]
-layout_mode = 2
-size_flags_horizontal = 3
-text = "HEAT"
-
-[node name="HeatValue" type="Label" parent="MarginContainer/VBoxContainer/HeatText"]
-layout_mode = 2
-text = "0k"
-
-[node name="Control2" type="Control" parent="MarginContainer/VBoxContainer/HeatText"]
-custom_minimum_size = Vector2(5, 0)
-layout_mode = 2
-
-[node name="HeatBar" type="ProgressBar" parent="MarginContainer/VBoxContainer"]
-unique_name_in_owner = true
-layout_mode = 2
-
-[node name="Control2" type="Control" parent="MarginContainer/VBoxContainer"]
-custom_minimum_size = Vector2(0, 5)
-layout_mode = 2
-
-[node name="WarningsPanel" type="PanelContainer" parent="MarginContainer/VBoxContainer"]
-unique_name_in_owner = true
-layout_mode = 2
-size_flags_vertical = 3
-script = ExtResource("2_n1bl1")
-
-[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/WarningsPanel"]
-layout_mode = 2
-
-[node name="RowFuel" type="HBoxContainer" parent="MarginContainer/VBoxContainer/WarningsPanel/VBoxContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="Light" type="TextureRect" parent="MarginContainer/VBoxContainer/WarningsPanel/VBoxContainer/RowFuel"]
+[node name="FuelPanel" type="HBoxContainer" parent="MarginContainer/VBoxContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="PanelContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer/VBoxContainer/FuelPanel"]
+custom_minimum_size = Vector2(50, 0)
+layout_mode = 2
+
+[node name="Control" type="Control" parent="MarginContainer/VBoxContainer/VBoxContainer/FuelPanel/PanelContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="MessageBox" type="PanelContainer" parent="MarginContainer/VBoxContainer/WarningsPanel/VBoxContainer/RowFuel"]
+[node name="LightPanel" type="VBoxContainer" parent="MarginContainer/VBoxContainer/VBoxContainer/FuelPanel/PanelContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+alignment = 1
+
+[node name="FLight 1" type="ColorRect" parent="MarginContainer/VBoxContainer/VBoxContainer/FuelPanel/PanelContainer/LightPanel"]
+custom_minimum_size = Vector2(10, 10)
+layout_mode = 2
+
+[node name="FLight 2" type="ColorRect" parent="MarginContainer/VBoxContainer/VBoxContainer/FuelPanel/PanelContainer/LightPanel"]
+custom_minimum_size = Vector2(10, 10)
+layout_mode = 2
+
+[node name="FLight 3" type="ColorRect" parent="MarginContainer/VBoxContainer/VBoxContainer/FuelPanel/PanelContainer/LightPanel"]
+custom_minimum_size = Vector2(10, 10)
+layout_mode = 2
+
+[node name="FLight 4" type="ColorRect" parent="MarginContainer/VBoxContainer/VBoxContainer/FuelPanel/PanelContainer/LightPanel"]
+custom_minimum_size = Vector2(10, 10)
+layout_mode = 2
+
+[node name="FLight 5" type="ColorRect" parent="MarginContainer/VBoxContainer/VBoxContainer/FuelPanel/PanelContainer/LightPanel"]
+custom_minimum_size = Vector2(10, 10)
+layout_mode = 2
+
+[node name="FLight 6" type="ColorRect" parent="MarginContainer/VBoxContainer/VBoxContainer/FuelPanel/PanelContainer/LightPanel"]
+custom_minimum_size = Vector2(10, 10)
+layout_mode = 2
+
+[node name="Control2" type="Control" parent="MarginContainer/VBoxContainer/VBoxContainer/FuelPanel/PanelContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="Scroll" type="ScrollContainer" parent="MarginContainer/VBoxContainer/WarningsPanel/VBoxContainer/RowFuel/MessageBox"]
+[node name="ContentPanel" type="VBoxContainer" parent="MarginContainer/VBoxContainer/VBoxContainer/FuelPanel"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/VBoxContainer/FuelPanel/ContentPanel"]
 layout_mode = 2
 
-[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/WarningsPanel/VBoxContainer/RowFuel/MessageBox/Scroll"]
+[node name="Title" type="Label" parent="MarginContainer/VBoxContainer/VBoxContainer/FuelPanel/ContentPanel/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 1
+theme_override_font_sizes/font_size = 16
+text = "Fuel Status"
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer/VBoxContainer/FuelPanel/ContentPanel/VBoxContainer"]
 layout_mode = 2
 
-[node name="RowCoolant" type="HBoxContainer" parent="MarginContainer/VBoxContainer/WarningsPanel/VBoxContainer"]
+[node name="FDrainLabel" type="Label" parent="MarginContainer/VBoxContainer/VBoxContainer/FuelPanel/ContentPanel/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 10
+text = "Drain: 0.00/t"
+
+[node name="Control" type="Control" parent="MarginContainer/VBoxContainer/VBoxContainer/FuelPanel/ContentPanel/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="FStorLabel" type="Label" parent="MarginContainer/VBoxContainer/VBoxContainer/FuelPanel/ContentPanel/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 10
+text = "0.00 ml/1000 ml"
+horizontal_alignment = 2
+
+[node name="FuelBar" type="ProgressBar" parent="MarginContainer/VBoxContainer/VBoxContainer/FuelPanel/ContentPanel"]
+layout_mode = 2
+
+[node name="ScrollContainer" type="ScrollContainer" parent="MarginContainer/VBoxContainer/VBoxContainer/FuelPanel/ContentPanel"]
 layout_mode = 2
 size_flags_vertical = 3
+horizontal_scroll_mode = 3
+vertical_scroll_mode = 0
 
-[node name="Light" type="TextureRect" parent="MarginContainer/VBoxContainer/WarningsPanel/VBoxContainer/RowCoolant"]
+[node name="FWarningLabel" type="Label" parent="MarginContainer/VBoxContainer/VBoxContainer/FuelPanel/ContentPanel/ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+uppercase = true
+
+[node name="Control5" type="Control" parent="MarginContainer/VBoxContainer/VBoxContainer/FuelPanel"]
+custom_minimum_size = Vector2(8, 0)
+layout_mode = 2
+
+[node name="CoolantPanel" type="HBoxContainer" parent="MarginContainer/VBoxContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="PanelContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer/VBoxContainer/CoolantPanel"]
+custom_minimum_size = Vector2(50, 0)
+layout_mode = 2
+
+[node name="Control" type="Control" parent="MarginContainer/VBoxContainer/VBoxContainer/CoolantPanel/PanelContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="MessageBox" type="PanelContainer" parent="MarginContainer/VBoxContainer/WarningsPanel/VBoxContainer/RowCoolant"]
+[node name="LightPanel" type="VBoxContainer" parent="MarginContainer/VBoxContainer/VBoxContainer/CoolantPanel/PanelContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+alignment = 1
+
+[node name="CLight 1" type="ColorRect" parent="MarginContainer/VBoxContainer/VBoxContainer/CoolantPanel/PanelContainer/LightPanel"]
+custom_minimum_size = Vector2(10, 10)
+layout_mode = 2
+
+[node name="CLight 2" type="ColorRect" parent="MarginContainer/VBoxContainer/VBoxContainer/CoolantPanel/PanelContainer/LightPanel"]
+custom_minimum_size = Vector2(10, 10)
+layout_mode = 2
+
+[node name="CLight 3" type="ColorRect" parent="MarginContainer/VBoxContainer/VBoxContainer/CoolantPanel/PanelContainer/LightPanel"]
+custom_minimum_size = Vector2(10, 10)
+layout_mode = 2
+
+[node name="CLight 4" type="ColorRect" parent="MarginContainer/VBoxContainer/VBoxContainer/CoolantPanel/PanelContainer/LightPanel"]
+custom_minimum_size = Vector2(10, 10)
+layout_mode = 2
+
+[node name="CLight 5" type="ColorRect" parent="MarginContainer/VBoxContainer/VBoxContainer/CoolantPanel/PanelContainer/LightPanel"]
+custom_minimum_size = Vector2(10, 10)
+layout_mode = 2
+
+[node name="CLight 6" type="ColorRect" parent="MarginContainer/VBoxContainer/VBoxContainer/CoolantPanel/PanelContainer/LightPanel"]
+custom_minimum_size = Vector2(10, 10)
+layout_mode = 2
+
+[node name="Control2" type="Control" parent="MarginContainer/VBoxContainer/VBoxContainer/CoolantPanel/PanelContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="ScrollContainer" type="ScrollContainer" parent="MarginContainer/VBoxContainer/WarningsPanel/VBoxContainer/RowCoolant/MessageBox"]
+[node name="ContentPanel" type="VBoxContainer" parent="MarginContainer/VBoxContainer/VBoxContainer/CoolantPanel"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/VBoxContainer/CoolantPanel/ContentPanel"]
 layout_mode = 2
 
-[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/WarningsPanel/VBoxContainer/RowCoolant/MessageBox/ScrollContainer"]
+[node name="Title" type="Label" parent="MarginContainer/VBoxContainer/VBoxContainer/CoolantPanel/ContentPanel/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 1
+theme_override_font_sizes/font_size = 16
+text = "Coolant Status"
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer/VBoxContainer/CoolantPanel/ContentPanel/VBoxContainer"]
 layout_mode = 2
 
-[node name="RowHeat" type="HBoxContainer" parent="MarginContainer/VBoxContainer/WarningsPanel/VBoxContainer"]
+[node name="CDrainLabel" type="Label" parent="MarginContainer/VBoxContainer/VBoxContainer/CoolantPanel/ContentPanel/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 10
+text = "Drain: 0.00/t"
+
+[node name="Control" type="Control" parent="MarginContainer/VBoxContainer/VBoxContainer/CoolantPanel/ContentPanel/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="CStorLabel" type="Label" parent="MarginContainer/VBoxContainer/VBoxContainer/CoolantPanel/ContentPanel/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 10
+text = "0.00 ml/1000 ml"
+horizontal_alignment = 2
+
+[node name="CoolBar" type="ProgressBar" parent="MarginContainer/VBoxContainer/VBoxContainer/CoolantPanel/ContentPanel"]
+layout_mode = 2
+
+[node name="ScrollContainer" type="ScrollContainer" parent="MarginContainer/VBoxContainer/VBoxContainer/CoolantPanel/ContentPanel"]
 layout_mode = 2
 size_flags_vertical = 3
+horizontal_scroll_mode = 3
+vertical_scroll_mode = 0
 
-[node name="Light" type="TextureRect" parent="MarginContainer/VBoxContainer/WarningsPanel/VBoxContainer/RowHeat"]
+[node name="CWarningLabel" type="Label" parent="MarginContainer/VBoxContainer/VBoxContainer/CoolantPanel/ContentPanel/ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+uppercase = true
+
+[node name="Control4" type="Control" parent="MarginContainer/VBoxContainer/VBoxContainer/CoolantPanel"]
+custom_minimum_size = Vector2(8, 0)
+layout_mode = 2
+
+[node name="HeatPanel" type="HBoxContainer" parent="MarginContainer/VBoxContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="PanelContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer/VBoxContainer/HeatPanel"]
+custom_minimum_size = Vector2(50, 0)
+layout_mode = 2
+
+[node name="Control" type="Control" parent="MarginContainer/VBoxContainer/VBoxContainer/HeatPanel/PanelContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="MessageBox" type="PanelContainer" parent="MarginContainer/VBoxContainer/WarningsPanel/VBoxContainer/RowHeat"]
+[node name="LightPanel" type="VBoxContainer" parent="MarginContainer/VBoxContainer/VBoxContainer/HeatPanel/PanelContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+alignment = 1
+
+[node name="HLight 1" type="ColorRect" parent="MarginContainer/VBoxContainer/VBoxContainer/HeatPanel/PanelContainer/LightPanel"]
+custom_minimum_size = Vector2(10, 10)
+layout_mode = 2
+
+[node name="HLight 2" type="ColorRect" parent="MarginContainer/VBoxContainer/VBoxContainer/HeatPanel/PanelContainer/LightPanel"]
+custom_minimum_size = Vector2(10, 10)
+layout_mode = 2
+
+[node name="HLight 3" type="ColorRect" parent="MarginContainer/VBoxContainer/VBoxContainer/HeatPanel/PanelContainer/LightPanel"]
+custom_minimum_size = Vector2(10, 10)
+layout_mode = 2
+
+[node name="HLight 4" type="ColorRect" parent="MarginContainer/VBoxContainer/VBoxContainer/HeatPanel/PanelContainer/LightPanel"]
+custom_minimum_size = Vector2(10, 10)
+layout_mode = 2
+
+[node name="HLight 5" type="ColorRect" parent="MarginContainer/VBoxContainer/VBoxContainer/HeatPanel/PanelContainer/LightPanel"]
+custom_minimum_size = Vector2(10, 10)
+layout_mode = 2
+
+[node name="HLight 6" type="ColorRect" parent="MarginContainer/VBoxContainer/VBoxContainer/HeatPanel/PanelContainer/LightPanel"]
+custom_minimum_size = Vector2(10, 10)
+layout_mode = 2
+
+[node name="Control2" type="Control" parent="MarginContainer/VBoxContainer/VBoxContainer/HeatPanel/PanelContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="ScrollContainer" type="ScrollContainer" parent="MarginContainer/VBoxContainer/WarningsPanel/VBoxContainer/RowHeat/MessageBox"]
+[node name="ContentPanel" type="VBoxContainer" parent="MarginContainer/VBoxContainer/VBoxContainer/HeatPanel"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/VBoxContainer/HeatPanel/ContentPanel"]
 layout_mode = 2
 
-[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/WarningsPanel/VBoxContainer/RowHeat/MessageBox/ScrollContainer"]
+[node name="Title" type="Label" parent="MarginContainer/VBoxContainer/VBoxContainer/HeatPanel/ContentPanel/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 1
+theme_override_font_sizes/font_size = 16
+text = "Reactor Temperatures"
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer/VBoxContainer/HeatPanel/ContentPanel/VBoxContainer"]
+layout_mode = 2
+
+[node name="Control" type="Control" parent="MarginContainer/VBoxContainer/VBoxContainer/HeatPanel/ContentPanel/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="HTempLabel" type="Label" parent="MarginContainer/VBoxContainer/VBoxContainer/HeatPanel/ContentPanel/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 10
+text = "100°"
+horizontal_alignment = 2
+
+[node name="CoolBar" type="ProgressBar" parent="MarginContainer/VBoxContainer/VBoxContainer/HeatPanel/ContentPanel"]
+layout_mode = 2
+
+[node name="ScrollContainer" type="ScrollContainer" parent="MarginContainer/VBoxContainer/VBoxContainer/HeatPanel/ContentPanel"]
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 3
+vertical_scroll_mode = 0
+
+[node name="CWarningLabel" type="Label" parent="MarginContainer/VBoxContainer/VBoxContainer/HeatPanel/ContentPanel/ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+uppercase = true
+
+[node name="Control3" type="Control" parent="MarginContainer/VBoxContainer/VBoxContainer/HeatPanel"]
+custom_minimum_size = Vector2(8, 0)
 layout_mode = 2
