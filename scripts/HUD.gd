@@ -16,38 +16,65 @@ const MA_WINDOW: int = 10   # keep last 10 ticks
 
 var _samples: Array = []     # Array<float>
 var _accum := 0.0
+var _dbg_left := 8
+
+var _last_eu: float = 0.0
+var _sample_accum: float = 0.0
+var _tick_len: float = 0.1  # will read GS.STEP if present
 
 func _ready() -> void:
-	# Update immediately
 	_refresh()
-	# If GS emits a signal when EU changes, hook it to refresh instantly
-	if GS.has_signal("eu_changed"):
-		GS.connect("eu_changed", Callable(self, "_on_state_bump"))
-	# Low-cost polling as a safety net (covers money/fuel/coolant changes too)
-	set_process(true)
-	if GS.has_signal("eu_tick_generated"):
+	
+	if "STEP" in GS:
+		_tick_len = float(GS.STEP)
+
+	_last_eu = GS.eu
+
+	# EU value updates
+	if GS.has_signal("eu_changed") and not GS.eu_changed.is_connected(Callable(self, "_on_state_bump")):
+		GS.eu_changed.connect(_on_state_bump)
+
+	# Eu/tick stream
+	if GS.has_signal("eu_tick_generated") and not GS.eu_tick_generated.is_connected(Callable(self, "_on_eu_tick")):
 		GS.eu_tick_generated.connect(_on_eu_tick)
-	if GS.has_signal("eu_rate_changed"):
+	# Optional Eu/s stream
+	if GS.has_signal("eu_rate_changed") and not GS.eu_rate_changed.is_connected(Callable(self, "_on_eu_rate")):
 		GS.eu_rate_changed.connect(_on_eu_rate)
-	# seed UI from current state
+
 	_update_rate_text(GS.get_eu_last_tick())
+	set_process(true)
 
 func _process(delta: float) -> void:
 	_accum += delta
 	if _accum >= 0.15:
 		_accum = 0.0
 		_refresh()
+	
+	_sample_accum += delta
+	if _sample_accum >= _tick_len:
+		_sample_accum -= _tick_len
+		var cur: float = GS.eu
+		var d: float = cur - _last_eu
+		if d < 0.0:
+			d = 0.0  # ignore sinks (selling, spending) for Eu/t production
+		_last_eu = cur
+		if d > 0.0:
+			_add_sample(d)
+			_update_rate_text(_avg_samples())
+		elif _samples.is_empty():
+			# keep label from sitting at stale 0 when nothing produced yet
+			_update_rate_text(GS.get_eu_last_tick())
 
 func _on_state_bump(_v := 0.0) -> void:
 	_refresh()
 
 func _refresh() -> void:
-	eu_label.text = "Eu: %.1f" % GS.eu
-	money_label.text = "$$: %.1f" % GS.money
-	# ept_label.text = "Eu/t: %.1f" % GS._eu
+	if eu_label:
+		eu_label.text = "Eu: %.1f" % GS.eu
+	if money_label:
+		money_label.text = "$$: %.1f" % GS.money
 
 func _on_eu_tick(amount: float) -> void:
-	# amount is Eu produced THIS sim tick (pillars). Convert to display per tick.
 	_add_sample(amount)
 	_update_rate_text(_avg_samples())
 

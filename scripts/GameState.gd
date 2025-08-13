@@ -539,8 +539,9 @@ func sim_tick(dt: float) -> void:
 		total_heat_s += heat_pulse / dt
 		_eu_last_tick = produced_eu
 		_eu_rate_ps = produced_eu / dt
-		eu_tick_generated.emit(_eu_last_tick)
-		eu_rate_changed.emit(_eu_rate_ps)
+		if produced_eu > 0.0:
+			eu_tick_generated.emit(_eu_last_tick)
+			eu_rate_changed.emit(_eu_rate_ps)
 
 	if produced_eu > 0.0:
 		add_eu(produced_eu, "pillar_sim")   # reason starts with "pillar_…" if you prefer
@@ -592,12 +593,22 @@ func _count_enabled_pillars() -> int:
 func add_eu(amount: float, reason: String = "") -> void:
 	if amount == 0.0:
 		return
-	
+
+	# keep your vent guard for pillar sim
 	if is_venting and (_in_pillar_tick or reason.begins_with("pillar")):
 		return
 
 	eu += amount
-	emit_signal("eu_changed", eu)
+	eu_changed.emit(eu)
+
+	# Feed Eu/t for everything that didn't come from the sim_tick produced_eu path
+	# (that path uses reason == "pillar_sim")
+	if amount > 0.0 and reason != "pillar_sim":
+		_eu_last_tick = amount
+		eu_tick_generated.emit(amount)
+		if STEP > 0.0:
+			_eu_rate_ps = amount / STEP
+			eu_rate_changed.emit(_eu_rate_ps)
 
 func spend_eu(a: float) -> bool:
 	if _eu >= a:
@@ -946,6 +957,7 @@ func _tick_pillars(dt: float) -> void:
 		return
 	else:
 		var count: int = min(PILLAR_COUNT, pillars.size())
+		_in_pillar_tick = true
 		for i in range(count):
 			var p: Dictionary = pillars[i]
 			if not bool(p.get("unlocked", false)): continue

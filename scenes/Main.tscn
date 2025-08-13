@@ -42,17 +42,20 @@ script = ExtResource("2_y18xa")
 layout_mode = 2
 
 [node name="EuLabel" type="Label" parent="VBoxContainer/PanelContainer/HEADER/TopBar"]
+unique_name_in_owner = true
 layout_mode = 2
 theme_type_variation = &"HeaderLarge"
 text = "Eu: 0"
 
 [node name="MoneyLabel" type="Label" parent="VBoxContainer/PanelContainer/HEADER/TopBar"]
+unique_name_in_owner = true
 layout_mode = 2
 theme_type_variation = &"HeaderLarge"
 theme_override_colors/font_color = Color(0.501961, 0.752941, 0.364706, 1)
 text = "$$: 0"
 
 [node name="EuRateLabel" type="Label" parent="VBoxContainer/PanelContainer/HEADER/TopBar"]
+unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.639216, 0.831373, 0.890196, 1)
 theme_override_font_sizes/font_size = 11
