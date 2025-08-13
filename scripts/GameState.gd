@@ -375,6 +375,13 @@ func _on_vent_timeout() -> void:
 	manual_ignite_enabled = true
 	emit_signal("venting_finished")
 	get_tree().call_group("reaction_pillars", "_vent_unlock")
+	_ignite_sanity() 
+
+func _ignite_sanity() -> void:
+	# If we are not venting, manual ignite should be allowed
+	if not is_venting and not manual_ignite_enabled:
+		manual_ignite_enabled = true
+
 
 
 
@@ -437,7 +444,9 @@ func _process(delta: float) -> void:
 	# Optional passive refill if you want visible motion for now
 	if COOLANT_REFILL_PER_SEC > 0.0 and _coolant < coolant_cap and not is_venting:
 		add_coolant(COOLANT_REFILL_PER_SEC * delta)
-
+	
+	_ignite_sanity() 
+	
 	var dheat: float = (warm - cool) * delta
 	heat = _heat + dheat
 

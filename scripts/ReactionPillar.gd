@@ -165,12 +165,14 @@ func _on_upgrade() -> void:
 func _vent_lock() -> void:
 	_vent_locked = true
 	if _pulse_timer: _pulse_timer.stop()
+	set_process(false)
 
 func _on_unlock() -> void:
 	GS.unlock_pillar(idx)
 	_vent_locked = false
 	_update_timer()
 	_refresh()
+	set_process(true)
 
 func _on_pillar_fired(i: int, _payload: Variant = null) -> void:
 	if i != idx: return
