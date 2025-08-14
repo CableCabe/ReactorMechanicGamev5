@@ -81,33 +81,28 @@ func _clean_button_connections(btn: Button, target: Callable) -> void:
 		btn.pressed.disconnect(target)
 
 func _on_ignite() -> void:
-	# Disallow during vent or if model says manual ignite is off
-	if GS.is_venting:
+	if GS.is_venting or not GS.manual_ignite_enabled:
+		return
+	# guard resources
+	if GS.coolant < GS.COOLANT_PER_IGNITE or GS.fuel < GS.FUEL_PER_IGNITE:
 		return
 
-	# Optional extra gate: ensure we actually can pay the manual costs
-	if GS.coolant < GS.COOLANT_PER_IGNITE:
-		return
+	# spend
+	GS.add_fuel(-GS.FUEL_PER_IGNITE)
+	GS.add_coolant(-GS.COOLANT_PER_IGNITE)
 
-	if GS._vent_timer and GS._vent_timer.time_left > 0.0:
-		push_warning("[WARN] Vent timer active during Ignite — check button connections.")
-		return
-	
-	# Spend resources (use model helpers)
-	if GS.has_method("add_fuel"):
-		GS.add_fuel(-GS.FUEL_PER_IGNITE)
-	if GS.has_method("add_coolant"):
-		GS.add_coolant(-GS.COOLANT_PER_IGNITE)
-
-	# Apply output
+	# produce
 	var mult: float = GS.heat_rate_mult()
-	GS.add_eu(_ignite_delta() * mult)
+	var eu_gain: float = _ignite_delta() * mult
+	GS.add_eu(eu_gain, "manual_ignite")  # <-- GameState will fold this into Eu/t
 	GS.add_heat_pulse(GS.IGNITE_HEAT_PULSE)
 
-	# Ensure the button doesn't remain disabled unless venting started this frame
-	call_deferred("_post_ignite_ui")
-	call_deferred("_sync_from_model")
-	call_deferred("_refresh_buttons_text_only")
+	GS.add_heat_pulse(GS.IGNITE_HEAT_PULSE)
+	ignite_btn.disabled = false
+	if vent_btn and not GS.is_venting:
+		vent_btn.disabled = false
+	_refresh_buttons_text_only()
+
 
 func _post_ignite_ui() -> void:
 	_apply_venting_state()  # re‑reads GS.is_venting + GS.manual_ignite_enabled

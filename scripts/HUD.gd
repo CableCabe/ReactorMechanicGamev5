@@ -10,9 +10,10 @@ extends HBoxContainer
 @export var eu_rate_label_path: NodePath
 var EURateLabel: Label = null
 
-var _ept_samples: Array = []
 var _accum := 0.0
 var _warned := false
+var _ept_window: int = 12
+var _ept_samples: Array[float] = []
 
 func _ready() -> void:
 	# Resolve rate label robustly
@@ -35,11 +36,7 @@ func _ready() -> void:
 		GS.money_changed.connect(func(_v): _refresh_numbers())
 		
 	if GS.has_signal("eu_tick_generated"):
-		GS.eu_tick_generated.connect(func(amount: float) -> void:
-			# keep samples in sync if you chose the smoothed option
-			_push_ept(amount)
-			if EURateLabel:
-				EURateLabel.text = "%0.2f Eu/tick" % (amount))
+		GS.eu_tick_generated.connect(_on_ept_tick)
 
 	set_process(true)
 
@@ -71,7 +68,19 @@ func _push_ept(v: float) -> void:
 		_ept_samples.pop_front()
 
 func _avg_ept() -> float:
-	if _ept_samples.is_empty(): return 0.0
-	var s := 0.0
-	for x in _ept_samples: s += float(x)
-	return s / float(_ept_samples.size())
+	if _ept_samples.is_empty():
+		return 0.0
+	var sum := 0.0
+	for x in _ept_samples:
+		sum += x
+	return sum / float(_ept_samples.size())
+
+func _on_ept_tick(v: float, amount: float) -> void:
+	# accumulate moving average over the last N ticks
+	if v < 0.0: v = 0.0
+	_ept_samples.append(v)
+	if _ept_samples.size() > _ept_window:
+		_ept_samples.pop_front()
+	#_update_rate_label()
+	if EURateLabel:
+			EURateLabel.text = "%0.2f Eu/tick" % amount

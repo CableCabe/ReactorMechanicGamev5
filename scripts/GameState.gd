@@ -20,6 +20,7 @@ var flags: Dictionary = {"auto_sell_ratio": 0.01}
 var _in_pillar_tick := false  # set around the central pillar loop
 var _eu_last_tick: float = 0.0
 var _eu_rate_ps: float = 0.0
+var _ept_acc: float = 0.0
 
 const FUEL_TO_EU := 18.0
 const BASE_EU_S := 1.0
@@ -535,16 +536,19 @@ func sim_tick(dt: float) -> void:
 
 		if fired:
 			emit_signal("pillar_fired", i)
+			
 
-	if dt > 0.0:
-		total_heat_s += heat_pulse / dt
-		_eu_last_tick = produced_eu
-		_eu_rate_ps = produced_eu / dt
-		if produced_eu > 0.0:
-			_eu_last_tick = produced_eu
-			_eu_rate_ps = produced_eu / dt
-			eu_tick_generated.emit(_eu_last_tick)
-			eu_rate_changed.emit(_eu_rate_ps)
+#	if dt > 0.0:
+#		total_heat_s += heat_pulse / dt
+#		_eu_last_tick = produced_eu
+#		_eu_rate_ps = produced_eu / dt
+#		if produced_eu > 0.0:
+#			_eu_last_tick = produced_eu
+#			_eu_rate_ps = produced_eu / dt
+#			eu_tick_generated.emit(_eu_last_tick)
+#			eu_rate_changed.emit(_eu_rate_ps)
+
+	_ept_acc += produced_eu
 
 	if produced_eu > 0.0:
 		add_eu(produced_eu, "pillar_sim")   # reason starts with "pillar_…" if you prefer
@@ -559,6 +563,7 @@ func sim_tick(dt: float) -> void:
 		set_heat(heat - step)  # setter so UI updates
 		if _vent_cool_remaining <= 0.0:
 			_on_vent_timeout()
+		_flush_ept(dt)
 		return  # skip normal cooling and pillar effects while venting
 
 		
@@ -572,6 +577,7 @@ func sim_tick(dt: float) -> void:
 		coolant = max(0.0, coolant - 0.2 * dt)
 
 	emit_signal("state_changed")
+	_flush_ept(dt)
 	
 # DEBUG
 
@@ -598,18 +604,13 @@ func add_eu(amount: float, reason: String = "") -> void:
 	# keep your vent guard for pillar sim
 	if is_venting and (_in_pillar_tick or reason.begins_with("pillar")):
 		return
+	
 
 	eu += amount
 	eu_changed.emit(eu)
 
-	# Feed Eu/t for everything that didn't come from the sim_tick produced_eu path
-	# (that path uses reason == "pillar_sim")
-	if amount > 0.0 and reason != "pillar_sim":
-		_eu_last_tick = amount
-		eu_tick_generated.emit(amount)
-		if STEP > 0.0:
-			_eu_rate_ps = amount / STEP
-			eu_rate_changed.emit(_eu_rate_ps)
+	if reason != "pillar_sim":
+		_ept_acc += amount
 
 func spend_eu(a: float) -> bool:
 	if _eu >= a:
@@ -643,6 +644,16 @@ func get_eu_last_tick() -> float:
 
 func get_eu_rate_ps() -> float:
 	return _eu_rate_ps
+
+func _flush_ept(dt: float) -> void:
+	# push the combined Eu/t for this tick, then reset accumulator
+	_eu_last_tick = _ept_acc
+	if dt > 0.0:
+		_eu_rate_ps = _ept_acc / dt
+	if _ept_acc > 0.0:
+		eu_tick_generated.emit(_ept_acc)
+		eu_rate_changed.emit(_eu_rate_ps)
+	_ept_acc = 0.0
 
 
 # ---- MARKET ----
