@@ -4,7 +4,7 @@
 
 [node name="ReactionPillars" type="Control"]
 clip_contents = true
-custom_minimum_size = Vector2(425, 32)
+custom_minimum_size = Vector2(520, 120)
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -12,57 +12,66 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 size_flags_horizontal = 3
-size_flags_vertical = 3
+size_flags_vertical = 4
 script = ExtResource("1_xnyvk")
 
 [node name="HBoxContainer" type="HBoxContainer" parent="."]
 layout_mode = 0
-offset_right = 147.0
-offset_bottom = 39.0
+offset_right = 647.0
+offset_bottom = 116.0
 
 [node name="GridContainer" type="GridContainer" parent="HBoxContainer"]
 layout_mode = 2
 columns = 2
 
 [node name="LightEnabled" type="ColorRect" parent="HBoxContainer/GridContainer"]
-custom_minimum_size = Vector2(5, 5)
+unique_name_in_owner = true
+custom_minimum_size = Vector2(25, 0)
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
 [node name="LightFired" type="ColorRect" parent="HBoxContainer/GridContainer"]
-custom_minimum_size = Vector2(5, 5)
+unique_name_in_owner = true
+custom_minimum_size = Vector2(25, 0)
 layout_mode = 2
+color = Color(0, 0.698039, 1, 1)
 
 [node name="LightHeat" type="ColorRect" parent="HBoxContainer/GridContainer"]
-custom_minimum_size = Vector2(5, 5)
+unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
+color = Color(1, 0.109804, 0.109804, 1)
 
 [node name="LightVent" type="ColorRect" parent="HBoxContainer/GridContainer"]
-custom_minimum_size = Vector2(5, 5)
+unique_name_in_owner = true
 layout_mode = 2
+color = Color(1, 0.541176, 0.109804, 1)
 
 [node name="LightFuel" type="ColorRect" parent="HBoxContainer/GridContainer"]
-custom_minimum_size = Vector2(5, 5)
+unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
+color = Color(0.321569, 0.321569, 0.321569, 1)
 
 [node name="LightCool" type="ColorRect" parent="HBoxContainer/GridContainer"]
-custom_minimum_size = Vector2(5, 5)
+unique_name_in_owner = true
 layout_mode = 2
+color = Color(0.321569, 0.321569, 0.321569, 1)
 
 [node name="ColorRect7" type="ColorRect" parent="HBoxContainer/GridContainer"]
-custom_minimum_size = Vector2(5, 5)
+unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
+color = Color(0.321569, 0.321569, 0.321569, 1)
 
 [node name="ColorRect8" type="ColorRect" parent="HBoxContainer/GridContainer"]
-custom_minimum_size = Vector2(5, 5)
+unique_name_in_owner = true
 layout_mode = 2
+color = Color(0.321569, 0.321569, 0.321569, 1)
 
 [node name="VBoxContainer" type="VBoxContainer" parent="HBoxContainer"]
 layout_mode = 2
@@ -70,11 +79,12 @@ size_flags_horizontal = 3
 
 [node name="HBoxContainer" type="HBoxContainer" parent="HBoxContainer/VBoxContainer"]
 layout_mode = 2
+size_flags_vertical = 3
 
 [node name="NameLabel" type="Label" parent="HBoxContainer/VBoxContainer/HBoxContainer"]
+unique_name_in_owner = true
 layout_mode = 2
 size_flags_vertical = 1
-theme_override_font_sizes/font_size = 11
 text = "Reaction Pillar 1"
 uppercase = true
 
@@ -83,52 +93,60 @@ layout_mode = 2
 size_flags_horizontal = 3
 
 [node name="LevelLabel" type="Label" parent="HBoxContainer/VBoxContainer/HBoxContainer"]
+unique_name_in_owner = true
 layout_mode = 2
-theme_override_font_sizes/font_size = 7
 text = "Lvl. 1"
 horizontal_alignment = 2
 vertical_alignment = 2
 
 [node name="HBoxContainer2" type="HBoxContainer" parent="HBoxContainer/VBoxContainer"]
 layout_mode = 2
+size_flags_vertical = 3
 
-[node name="PanelContainer2" type="PanelContainer" parent="HBoxContainer/VBoxContainer/HBoxContainer2"]
-layout_mode = 2
-size_flags_horizontal = 3
-
-[node name="PulseLabel" type="Label" parent="HBoxContainer/VBoxContainer/HBoxContainer2/PanelContainer2"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 7
-text = "+0.00"
-horizontal_alignment = 2
-
-[node name="ChargeBar" type="ProgressBar" parent="HBoxContainer/VBoxContainer/HBoxContainer2/PanelContainer2"]
+[node name="ChargeBar" type="ProgressBar" parent="HBoxContainer/VBoxContainer/HBoxContainer2"]
+unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 1
 show_percentage = false
 
 [node name="PanelContainer" type="PanelContainer" parent="HBoxContainer/VBoxContainer/HBoxContainer2"]
-custom_minimum_size = Vector2(20, 16.34)
 layout_mode = 2
 
+[node name="PulseLabel" type="Label" parent="HBoxContainer/VBoxContainer/HBoxContainer2/PanelContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(64.13, 0)
+layout_mode = 2
+size_flags_vertical = 1
+text = "+0.00"
+horizontal_alignment = 1
+vertical_alignment = 1
+
 [node name="Flash" type="ColorRect" parent="HBoxContainer/VBoxContainer/HBoxContainer2/PanelContainer"]
-custom_minimum_size = Vector2(10, 10)
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(20, 20)
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
 
 [node name="HBoxContainer3" type="HBoxContainer" parent="HBoxContainer/VBoxContainer"]
 layout_mode = 2
+size_flags_vertical = 3
 
 [node name="OnButton" type="Button" parent="HBoxContainer/VBoxContainer/HBoxContainer3"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(50, 0)
 layout_mode = 2
-size_flags_horizontal = 3
 
 [node name="UpgradeBtn" type="Button" parent="HBoxContainer/VBoxContainer/HBoxContainer3"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(75, 0)
 layout_mode = 2
 size_flags_horizontal = 3
 
 [node name="UnlockBtn2" type="Button" parent="HBoxContainer/VBoxContainer/HBoxContainer3"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(75, 0)
 layout_mode = 2
 size_flags_horizontal = 3

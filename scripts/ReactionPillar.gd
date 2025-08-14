@@ -10,24 +10,24 @@ extends Control
 @export var pulse_eu: float = 2.0
 @export var pulse_interval: float = 1.0 # fallback if GS doesn't expose a period/rate
 
-@onready var name_label: Label = $VBoxContainer/HBoxContainer/NameLabel
-@onready var level_label: Label = $VBoxContainer/HBoxContainer/LevelLabel
+@onready var name_label: Label = %NameLabel
+@onready var level_label: Label = %LevelLabel
 
-@onready var progress: ProgressBar = $VBoxContainer/HBoxContainer2/PanelContainer2/ChargeBar
-@onready var pulse_label: Label = $VBoxContainer/HBoxContainer2/PanelContainer2/PulseLabel
-@onready var flash: ColorRect = $HBoxContainer/VBoxContainer/HBoxContainer2/PanelContainer/Flash
+@onready var progress: ProgressBar = %ChargeBar
+@onready var pulse_label: Label = %PulseLabel
+@onready var flash: ColorRect = %Flash
 
-@onready var toggle_btn: Button = $VBoxContainer/HBoxContainer3/OnButton
-@onready var up_btn: Button = $VBoxContainer/HBoxContainer3/UpgradeBtn
-@onready var unlock_btn: Button = $VBoxContainer/HBoxContainer3/UnlockBtn2
+@onready var toggle_btn: Button = %OnButton
+@onready var up_btn: Button = %UpgradeBtn
+@onready var unlock_btn: Button = %UnlockBtn2
 
 # 2×3 light board (you have 6 lights visible)
-@onready var light_enabled: ColorRect = $GridContainer/LightEnabled
-@onready var light_fired: ColorRect = $GridContainer/LightFired
-@onready var light_heat: ColorRect = $GridContainer/LightHeat
-@onready var light_vent: ColorRect = $GridContainer/LightVent
-@onready var light_fuel: ColorRect = $GridContainer/LightFuel
-@onready var light_cool: ColorRect = $GridContainer/LightCool
+@onready var light_enabled: ColorRect = %LightEnabled
+@onready var light_fired: ColorRect = %LightFired
+@onready var light_heat: ColorRect = %LightHeat
+@onready var light_vent: ColorRect = %LightVent
+@onready var light_fuel: ColorRect = %LightFuel
+@onready var light_cool: ColorRect = %LightCool
 
 @onready var GS: Node = (
 	get_tree().root.get_node_or_null("GS") if get_tree().root.has_node("GS")
