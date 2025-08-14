@@ -1,6 +1,8 @@
-[gd_scene load_steps=2 format=3 uid="uid://c74yjt60am62e"]
+[gd_scene load_steps=4 format=3 uid="uid://c74yjt60am62e"]
 
 [ext_resource type="Script" path="res://scripts/ReactorView.gd" id="1_i5bm2"]
+[ext_resource type="Script" path="res://scripts/HeatLights.gd" id="2_dwvft"]
+[ext_resource type="Script" path="res://scripts/HeatBarOverlay.gd" id="3_w6v68"]
 
 [node name="ReactorView" type="PanelContainer"]
 offset_right = 240.0
@@ -256,13 +258,14 @@ size_flags_horizontal = 3
 layout_mode = 2
 size_flags_horizontal = 3
 alignment = 1
+script = ExtResource("2_dwvft")
 
-[node name="HLight 1" type="ColorRect" parent="MarginContainer/VBoxContainer/VBoxContainer/HeatPanel/PanelContainer/LightPanel"]
+[node name="TooHotLight" type="ColorRect" parent="MarginContainer/VBoxContainer/VBoxContainer/HeatPanel/PanelContainer/LightPanel"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(10, 10)
 layout_mode = 2
 
-[node name="HLight 2" type="ColorRect" parent="MarginContainer/VBoxContainer/VBoxContainer/HeatPanel/PanelContainer/LightPanel"]
+[node name="TooColdLight" type="ColorRect" parent="MarginContainer/VBoxContainer/VBoxContainer/HeatPanel/PanelContainer/LightPanel"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(10, 10)
 layout_mode = 2
@@ -318,9 +321,19 @@ theme_override_font_sizes/font_size = 10
 text = "100°"
 horizontal_alignment = 2
 
-[node name="HeatBar" type="ProgressBar" parent="MarginContainer/VBoxContainer/VBoxContainer/HeatPanel/ContentPanel"]
+[node name="Control" type="PanelContainer" parent="MarginContainer/VBoxContainer/VBoxContainer/HeatPanel/ContentPanel/VBoxContainer"]
+layout_mode = 2
+
+[node name="HeatBar" type="ProgressBar" parent="MarginContainer/VBoxContainer/VBoxContainer/HeatPanel/ContentPanel/VBoxContainer/Control"]
 unique_name_in_owner = true
 layout_mode = 2
+
+[node name="HeatBarOverlay" type="Control" parent="MarginContainer/VBoxContainer/VBoxContainer/HeatPanel/ContentPanel/VBoxContainer/Control"]
+z_index = 1
+layout_mode = 2
+mouse_filter = 2
+script = ExtResource("3_w6v68")
+fill_color = Color(0, 0.890196, 0.384314, 0.180392)
 
 [node name="ScrollContainer" type="ScrollContainer" parent="MarginContainer/VBoxContainer/VBoxContainer/HeatPanel/ContentPanel"]
 layout_mode = 2

@@ -100,6 +100,9 @@ const IDLE_COOL_PER_SEC: float = 4.0
 const AMBIENT_WARM_PER_SEC: float = 1.0
 const IGNITE_HEAT_PULSE: float = 0.3
 
+var underheat: float = 25
+var overheat: float = 75
+
 # VENTING
 const VENT_COOL_PER_SEC: float = 6.5
 const VENT_DURATION_SEC: float = 8.0
@@ -323,7 +326,7 @@ func add_heat(d: float) -> void:
 
 # Sweet-spot: 35–65% is optimal, outside it halves output/rate.
 func heat_rate_mult() -> float:
-	if _heat < 35.0 or _heat > 65.0:
+	if _heat < underheat or _heat > overheat:
 		return 0.5
 	return 1.0
 

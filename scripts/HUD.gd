@@ -13,7 +13,6 @@ var EURateLabel: Label = null
 var _ept_samples: Array = []
 var _accum := 0.0
 var _warned := false
-var _dbg_once := true
 
 func _ready() -> void:
 	# Resolve rate label robustly
