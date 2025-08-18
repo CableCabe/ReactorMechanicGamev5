@@ -15,138 +15,958 @@ size_flags_horizontal = 3
 size_flags_vertical = 4
 script = ExtResource("1_xnyvk")
 
-[node name="HBoxContainer" type="HBoxContainer" parent="."]
-layout_mode = 0
-offset_right = 647.0
-offset_bottom = 116.0
-
-[node name="GridContainer" type="GridContainer" parent="HBoxContainer"]
-layout_mode = 2
+[node name="GridContainer" type="GridContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/h_separation = 15
+theme_override_constants/v_separation = 15
 columns = 2
 
-[node name="LightEnabled" type="ColorRect" parent="HBoxContainer/GridContainer"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(25, 0)
+[node name="ReaxPanel1" type="Panel" parent="GridContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
-[node name="LightFired" type="ColorRect" parent="HBoxContainer/GridContainer"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(25, 0)
+[node name="HBoxContainer" type="HBoxContainer" parent="GridContainer/ReaxPanel1"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="LightPanel1" type="GridContainer" parent="GridContainer/ReaxPanel1/HBoxContainer"]
 layout_mode = 2
+columns = 2
+
+[node name="LightEnabled1" type="ColorRect" parent="GridContainer/ReaxPanel1/HBoxContainer/LightPanel1"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(60, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="LightFired1" type="ColorRect" parent="GridContainer/ReaxPanel1/HBoxContainer/LightPanel1"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(60, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
 color = Color(0, 0.698039, 1, 1)
 
-[node name="LightHeat" type="ColorRect" parent="HBoxContainer/GridContainer"]
+[node name="LightHeat1" type="ColorRect" parent="GridContainer/ReaxPanel1/HBoxContainer/LightPanel1"]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(60, 0)
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 color = Color(1, 0.109804, 0.109804, 1)
 
-[node name="LightVent" type="ColorRect" parent="HBoxContainer/GridContainer"]
+[node name="LightVent1" type="ColorRect" parent="GridContainer/ReaxPanel1/HBoxContainer/LightPanel1"]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(60, 0)
 layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
 color = Color(1, 0.541176, 0.109804, 1)
 
-[node name="LightFuel" type="ColorRect" parent="HBoxContainer/GridContainer"]
+[node name="LightFuel1" type="ColorRect" parent="GridContainer/ReaxPanel1/HBoxContainer/LightPanel1"]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(60, 0)
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 color = Color(0.321569, 0.321569, 0.321569, 1)
 
-[node name="LightCool" type="ColorRect" parent="HBoxContainer/GridContainer"]
+[node name="LightCool1" type="ColorRect" parent="GridContainer/ReaxPanel1/HBoxContainer/LightPanel1"]
 unique_name_in_owner = true
-layout_mode = 2
-color = Color(0.321569, 0.321569, 0.321569, 1)
-
-[node name="ColorRect7" type="ColorRect" parent="HBoxContainer/GridContainer"]
-unique_name_in_owner = true
+custom_minimum_size = Vector2(60, 0)
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 color = Color(0.321569, 0.321569, 0.321569, 1)
 
-[node name="ColorRect8" type="ColorRect" parent="HBoxContainer/GridContainer"]
+[node name="ColorRect11" type="ColorRect" parent="GridContainer/ReaxPanel1/HBoxContainer/LightPanel1"]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(60, 0)
 layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
 color = Color(0.321569, 0.321569, 0.321569, 1)
 
-[node name="VBoxContainer" type="VBoxContainer" parent="HBoxContainer"]
+[node name="ColorRect12" type="ColorRect" parent="GridContainer/ReaxPanel1/HBoxContainer/LightPanel1"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(60, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+color = Color(0.321569, 0.321569, 0.321569, 1)
+
+[node name="Panel1" type="VBoxContainer" parent="GridContainer/ReaxPanel1/HBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="HBoxContainer" type="HBoxContainer" parent="HBoxContainer/VBoxContainer"]
+[node name="HBoxContainer" type="HBoxContainer" parent="GridContainer/ReaxPanel1/HBoxContainer/Panel1"]
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="NameLabel" type="Label" parent="HBoxContainer/VBoxContainer/HBoxContainer"]
-unique_name_in_owner = true
+[node name="NameLabel" type="Label" parent="GridContainer/ReaxPanel1/HBoxContainer/Panel1/HBoxContainer"]
 layout_mode = 2
 size_flags_vertical = 1
+theme_override_font_sizes/font_size = 30
 text = "Reaction Pillar 1"
+horizontal_alignment = 1
+vertical_alignment = 1
 uppercase = true
 
-[node name="Control" type="Control" parent="HBoxContainer/VBoxContainer/HBoxContainer"]
+[node name="Control" type="Control" parent="GridContainer/ReaxPanel1/HBoxContainer/Panel1/HBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="LevelLabel" type="Label" parent="HBoxContainer/VBoxContainer/HBoxContainer"]
+[node name="LevelLabel1" type="Label" parent="GridContainer/ReaxPanel1/HBoxContainer/Panel1/HBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
+theme_override_font_sizes/font_size = 30
 text = "Lvl. 1"
 horizontal_alignment = 2
 vertical_alignment = 2
 
-[node name="HBoxContainer2" type="HBoxContainer" parent="HBoxContainer/VBoxContainer"]
+[node name="HBoxContainer2" type="HBoxContainer" parent="GridContainer/ReaxPanel1/HBoxContainer/Panel1"]
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="ChargeBar" type="ProgressBar" parent="HBoxContainer/VBoxContainer/HBoxContainer2"]
+[node name="ChargeBar1" type="ProgressBar" parent="GridContainer/ReaxPanel1/HBoxContainer/Panel1/HBoxContainer2"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 1
 show_percentage = false
 
-[node name="PanelContainer" type="PanelContainer" parent="HBoxContainer/VBoxContainer/HBoxContainer2"]
+[node name="PanelContainer" type="PanelContainer" parent="GridContainer/ReaxPanel1/HBoxContainer/Panel1/HBoxContainer2"]
 layout_mode = 2
 
-[node name="PulseLabel" type="Label" parent="HBoxContainer/VBoxContainer/HBoxContainer2/PanelContainer"]
+[node name="PulseLabel1" type="Label" parent="GridContainer/ReaxPanel1/HBoxContainer/Panel1/HBoxContainer2/PanelContainer"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(64.13, 0)
+custom_minimum_size = Vector2(125, 0)
 layout_mode = 2
 size_flags_vertical = 1
+theme_override_font_sizes/font_size = 30
 text = "+0.00"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="Flash" type="ColorRect" parent="HBoxContainer/VBoxContainer/HBoxContainer2/PanelContainer"]
-unique_name_in_owner = true
-visible = false
-custom_minimum_size = Vector2(20, 20)
-layout_mode = 2
-size_flags_horizontal = 4
-size_flags_vertical = 4
-
-[node name="HBoxContainer3" type="HBoxContainer" parent="HBoxContainer/VBoxContainer"]
+[node name="HBoxContainer3" type="HBoxContainer" parent="GridContainer/ReaxPanel1/HBoxContainer/Panel1"]
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="OnButton" type="Button" parent="HBoxContainer/VBoxContainer/HBoxContainer3"]
+[node name="OnButton1" type="Button" parent="GridContainer/ReaxPanel1/HBoxContainer/Panel1/HBoxContainer3"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(50, 0)
 layout_mode = 2
+theme_override_font_sizes/font_size = 60
+text = " OFF "
 
-[node name="UpgradeBtn" type="Button" parent="HBoxContainer/VBoxContainer/HBoxContainer3"]
+[node name="UpgradeBtn1" type="Button" parent="GridContainer/ReaxPanel1/HBoxContainer/Panel1/HBoxContainer3"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(75, 0)
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="UnlockBtn2" type="Button" parent="HBoxContainer/VBoxContainer/HBoxContainer3"]
+[node name="ColorRect" type="ColorRect" parent="GridContainer/ReaxPanel1"]
+z_index = -1
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+
+[node name="ReaxPanel2" type="Panel" parent="GridContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="HBoxContainer" type="HBoxContainer" parent="GridContainer/ReaxPanel2"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+
+[node name="LightPanel2" type="GridContainer" parent="GridContainer/ReaxPanel2/HBoxContainer"]
+custom_minimum_size = Vector2(125, 0)
+layout_mode = 2
+columns = 2
+
+[node name="LightEnabled2" type="ColorRect" parent="GridContainer/ReaxPanel2/HBoxContainer/LightPanel2"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(25, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="LightFired2" type="ColorRect" parent="GridContainer/ReaxPanel2/HBoxContainer/LightPanel2"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(25, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+color = Color(0, 0.698039, 1, 1)
+
+[node name="LightHeat2" type="ColorRect" parent="GridContainer/ReaxPanel2/HBoxContainer/LightPanel2"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+color = Color(1, 0.109804, 0.109804, 1)
+
+[node name="LightVent2" type="ColorRect" parent="GridContainer/ReaxPanel2/HBoxContainer/LightPanel2"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+color = Color(1, 0.541176, 0.109804, 1)
+
+[node name="LightFuel2" type="ColorRect" parent="GridContainer/ReaxPanel2/HBoxContainer/LightPanel2"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+color = Color(0.321569, 0.321569, 0.321569, 1)
+
+[node name="LightCool2" type="ColorRect" parent="GridContainer/ReaxPanel2/HBoxContainer/LightPanel2"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+color = Color(0.321569, 0.321569, 0.321569, 1)
+
+[node name="ColorRect21" type="ColorRect" parent="GridContainer/ReaxPanel2/HBoxContainer/LightPanel2"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+color = Color(0.321569, 0.321569, 0.321569, 1)
+
+[node name="ColorRect22" type="ColorRect" parent="GridContainer/ReaxPanel2/HBoxContainer/LightPanel2"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+color = Color(0.321569, 0.321569, 0.321569, 1)
+
+[node name="Panel2" type="VBoxContainer" parent="GridContainer/ReaxPanel2/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="HBoxContainer" type="HBoxContainer" parent="GridContainer/ReaxPanel2/HBoxContainer/Panel2"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="NameLabel" type="Label" parent="GridContainer/ReaxPanel2/HBoxContainer/Panel2/HBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 1
+theme_override_font_sizes/font_size = 30
+text = "Reaction Pillar 2"
+horizontal_alignment = 1
+vertical_alignment = 1
+uppercase = true
+
+[node name="Control" type="Control" parent="GridContainer/ReaxPanel2/HBoxContainer/Panel2/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="LevelLabel2" type="Label" parent="GridContainer/ReaxPanel2/HBoxContainer/Panel2/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 30
+text = "Lvl. 1"
+horizontal_alignment = 2
+vertical_alignment = 2
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="GridContainer/ReaxPanel2/HBoxContainer/Panel2"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="ChargeBar2" type="ProgressBar" parent="GridContainer/ReaxPanel2/HBoxContainer/Panel2/HBoxContainer2"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 1
+show_percentage = false
+
+[node name="PanelContainer" type="PanelContainer" parent="GridContainer/ReaxPanel2/HBoxContainer/Panel2/HBoxContainer2"]
+layout_mode = 2
+
+[node name="PulseLabel2" type="Label" parent="GridContainer/ReaxPanel2/HBoxContainer/Panel2/HBoxContainer2/PanelContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(125, 0)
+layout_mode = 2
+size_flags_vertical = 1
+theme_override_font_sizes/font_size = 30
+text = "+0.00"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="HBoxContainer3" type="HBoxContainer" parent="GridContainer/ReaxPanel2/HBoxContainer/Panel2"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="OnButton2" type="Button" parent="GridContainer/ReaxPanel2/HBoxContainer/Panel2/HBoxContainer3"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(50, 0)
+layout_mode = 2
+mouse_filter = 2
+theme_override_font_sizes/font_size = 60
+text = " OFF "
+
+[node name="UpgradeBtn2" type="Button" parent="GridContainer/ReaxPanel2/HBoxContainer/Panel2/HBoxContainer3"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(75, 0)
 layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="ColorRect6" type="ColorRect" parent="GridContainer/ReaxPanel2"]
+z_index = -1
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+
+[node name="ReaxPanel3" type="Panel" parent="GridContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="HBoxContainer" type="HBoxContainer" parent="GridContainer/ReaxPanel3"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+
+[node name="LightPanel3" type="GridContainer" parent="GridContainer/ReaxPanel3/HBoxContainer"]
+custom_minimum_size = Vector2(125, 0)
+layout_mode = 2
+columns = 2
+
+[node name="LightEnabled3" type="ColorRect" parent="GridContainer/ReaxPanel3/HBoxContainer/LightPanel3"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(25, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="LightFired3" type="ColorRect" parent="GridContainer/ReaxPanel3/HBoxContainer/LightPanel3"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(25, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+color = Color(0, 0.698039, 1, 1)
+
+[node name="LightHeat3" type="ColorRect" parent="GridContainer/ReaxPanel3/HBoxContainer/LightPanel3"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+color = Color(1, 0.109804, 0.109804, 1)
+
+[node name="LightVent3" type="ColorRect" parent="GridContainer/ReaxPanel3/HBoxContainer/LightPanel3"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+color = Color(1, 0.541176, 0.109804, 1)
+
+[node name="LightFuel3" type="ColorRect" parent="GridContainer/ReaxPanel3/HBoxContainer/LightPanel3"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+color = Color(0.321569, 0.321569, 0.321569, 1)
+
+[node name="LightCool3" type="ColorRect" parent="GridContainer/ReaxPanel3/HBoxContainer/LightPanel3"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+color = Color(0.321569, 0.321569, 0.321569, 1)
+
+[node name="ColorRect31" type="ColorRect" parent="GridContainer/ReaxPanel3/HBoxContainer/LightPanel3"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+color = Color(0.321569, 0.321569, 0.321569, 1)
+
+[node name="ColorRect32" type="ColorRect" parent="GridContainer/ReaxPanel3/HBoxContainer/LightPanel3"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+color = Color(0.321569, 0.321569, 0.321569, 1)
+
+[node name="Panel3" type="VBoxContainer" parent="GridContainer/ReaxPanel3/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="HBoxContainer" type="HBoxContainer" parent="GridContainer/ReaxPanel3/HBoxContainer/Panel3"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="NameLabel" type="Label" parent="GridContainer/ReaxPanel3/HBoxContainer/Panel3/HBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 1
+theme_override_font_sizes/font_size = 30
+text = "Reaction Pillar 3"
+horizontal_alignment = 1
+vertical_alignment = 1
+uppercase = true
+
+[node name="Control" type="Control" parent="GridContainer/ReaxPanel3/HBoxContainer/Panel3/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="LevelLabel3" type="Label" parent="GridContainer/ReaxPanel3/HBoxContainer/Panel3/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 30
+text = "Lvl. 1"
+horizontal_alignment = 2
+vertical_alignment = 2
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="GridContainer/ReaxPanel3/HBoxContainer/Panel3"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="ChargeBar3" type="ProgressBar" parent="GridContainer/ReaxPanel3/HBoxContainer/Panel3/HBoxContainer2"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 1
+show_percentage = false
+
+[node name="PanelContainer" type="PanelContainer" parent="GridContainer/ReaxPanel3/HBoxContainer/Panel3/HBoxContainer2"]
+layout_mode = 2
+
+[node name="PulseLabel3" type="Label" parent="GridContainer/ReaxPanel3/HBoxContainer/Panel3/HBoxContainer2/PanelContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(125, 0)
+layout_mode = 2
+size_flags_vertical = 1
+theme_override_font_sizes/font_size = 30
+text = "+0.00"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="HBoxContainer3" type="HBoxContainer" parent="GridContainer/ReaxPanel3/HBoxContainer/Panel3"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="OnButton3" type="Button" parent="GridContainer/ReaxPanel3/HBoxContainer/Panel3/HBoxContainer3"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(50, 0)
+layout_mode = 2
+mouse_filter = 2
+theme_override_font_sizes/font_size = 60
+text = " OFF "
+
+[node name="UpgradeBtn3" type="Button" parent="GridContainer/ReaxPanel3/HBoxContainer/Panel3/HBoxContainer3"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(75, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="ColorRect6" type="ColorRect" parent="GridContainer/ReaxPanel3"]
+z_index = -1
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+
+[node name="ReaxPanel4" type="Panel" parent="GridContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="HBoxContainer" type="HBoxContainer" parent="GridContainer/ReaxPanel4"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+
+[node name="LightPanel4" type="GridContainer" parent="GridContainer/ReaxPanel4/HBoxContainer"]
+custom_minimum_size = Vector2(125, 0)
+layout_mode = 2
+columns = 2
+
+[node name="LightEnabled4" type="ColorRect" parent="GridContainer/ReaxPanel4/HBoxContainer/LightPanel4"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(25, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="LightFired4" type="ColorRect" parent="GridContainer/ReaxPanel4/HBoxContainer/LightPanel4"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(25, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+color = Color(0, 0.698039, 1, 1)
+
+[node name="LightHeat4" type="ColorRect" parent="GridContainer/ReaxPanel4/HBoxContainer/LightPanel4"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+color = Color(1, 0.109804, 0.109804, 1)
+
+[node name="LightVent4" type="ColorRect" parent="GridContainer/ReaxPanel4/HBoxContainer/LightPanel4"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+color = Color(1, 0.541176, 0.109804, 1)
+
+[node name="LightFuel4" type="ColorRect" parent="GridContainer/ReaxPanel4/HBoxContainer/LightPanel4"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+color = Color(0.321569, 0.321569, 0.321569, 1)
+
+[node name="LightCool4" type="ColorRect" parent="GridContainer/ReaxPanel4/HBoxContainer/LightPanel4"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+color = Color(0.321569, 0.321569, 0.321569, 1)
+
+[node name="ColorRect41" type="ColorRect" parent="GridContainer/ReaxPanel4/HBoxContainer/LightPanel4"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+color = Color(0.321569, 0.321569, 0.321569, 1)
+
+[node name="ColorRect42" type="ColorRect" parent="GridContainer/ReaxPanel4/HBoxContainer/LightPanel4"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+color = Color(0.321569, 0.321569, 0.321569, 1)
+
+[node name="Panel4" type="VBoxContainer" parent="GridContainer/ReaxPanel4/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="HBoxContainer" type="HBoxContainer" parent="GridContainer/ReaxPanel4/HBoxContainer/Panel4"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="NameLabel" type="Label" parent="GridContainer/ReaxPanel4/HBoxContainer/Panel4/HBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 1
+theme_override_font_sizes/font_size = 30
+text = "Reaction Pillar 4"
+horizontal_alignment = 1
+vertical_alignment = 1
+uppercase = true
+
+[node name="Control" type="Control" parent="GridContainer/ReaxPanel4/HBoxContainer/Panel4/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="LevelLabel4" type="Label" parent="GridContainer/ReaxPanel4/HBoxContainer/Panel4/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 30
+text = "Lvl. 1"
+horizontal_alignment = 2
+vertical_alignment = 2
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="GridContainer/ReaxPanel4/HBoxContainer/Panel4"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="ChargeBar4" type="ProgressBar" parent="GridContainer/ReaxPanel4/HBoxContainer/Panel4/HBoxContainer2"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 1
+show_percentage = false
+
+[node name="PanelContainer" type="PanelContainer" parent="GridContainer/ReaxPanel4/HBoxContainer/Panel4/HBoxContainer2"]
+layout_mode = 2
+
+[node name="PulseLabel4" type="Label" parent="GridContainer/ReaxPanel4/HBoxContainer/Panel4/HBoxContainer2/PanelContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(125, 0)
+layout_mode = 2
+size_flags_vertical = 1
+theme_override_font_sizes/font_size = 30
+text = "+0.00"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="HBoxContainer3" type="HBoxContainer" parent="GridContainer/ReaxPanel4/HBoxContainer/Panel4"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="OnButton4" type="Button" parent="GridContainer/ReaxPanel4/HBoxContainer/Panel4/HBoxContainer3"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(50, 0)
+layout_mode = 2
+mouse_filter = 2
+theme_override_font_sizes/font_size = 60
+text = " OFF "
+
+[node name="UpgradeBtn4" type="Button" parent="GridContainer/ReaxPanel4/HBoxContainer/Panel4/HBoxContainer3"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(75, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="ColorRect6" type="ColorRect" parent="GridContainer/ReaxPanel4"]
+z_index = -1
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+
+[node name="ReaxPanel5" type="Panel" parent="GridContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="HBoxContainer" type="HBoxContainer" parent="GridContainer/ReaxPanel5"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+
+[node name="LightPanel5" type="GridContainer" parent="GridContainer/ReaxPanel5/HBoxContainer"]
+custom_minimum_size = Vector2(125, 0)
+layout_mode = 2
+columns = 2
+
+[node name="LightEnabled5" type="ColorRect" parent="GridContainer/ReaxPanel5/HBoxContainer/LightPanel5"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(25, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="LightFired5" type="ColorRect" parent="GridContainer/ReaxPanel5/HBoxContainer/LightPanel5"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(25, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+color = Color(0, 0.698039, 1, 1)
+
+[node name="LightHeat5" type="ColorRect" parent="GridContainer/ReaxPanel5/HBoxContainer/LightPanel5"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+color = Color(1, 0.109804, 0.109804, 1)
+
+[node name="LightVent5" type="ColorRect" parent="GridContainer/ReaxPanel5/HBoxContainer/LightPanel5"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+color = Color(1, 0.541176, 0.109804, 1)
+
+[node name="LightFuel5" type="ColorRect" parent="GridContainer/ReaxPanel5/HBoxContainer/LightPanel5"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+color = Color(0.321569, 0.321569, 0.321569, 1)
+
+[node name="LightCool5" type="ColorRect" parent="GridContainer/ReaxPanel5/HBoxContainer/LightPanel5"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+color = Color(0.321569, 0.321569, 0.321569, 1)
+
+[node name="ColorRect51" type="ColorRect" parent="GridContainer/ReaxPanel5/HBoxContainer/LightPanel5"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+color = Color(0.321569, 0.321569, 0.321569, 1)
+
+[node name="ColorRect52" type="ColorRect" parent="GridContainer/ReaxPanel5/HBoxContainer/LightPanel5"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+color = Color(0.321569, 0.321569, 0.321569, 1)
+
+[node name="Panel5" type="VBoxContainer" parent="GridContainer/ReaxPanel5/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="HBoxContainer" type="HBoxContainer" parent="GridContainer/ReaxPanel5/HBoxContainer/Panel5"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="NameLabel" type="Label" parent="GridContainer/ReaxPanel5/HBoxContainer/Panel5/HBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 1
+theme_override_font_sizes/font_size = 30
+text = "Reaction Pillar 5"
+horizontal_alignment = 1
+vertical_alignment = 1
+uppercase = true
+
+[node name="Control" type="Control" parent="GridContainer/ReaxPanel5/HBoxContainer/Panel5/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="LevelLabel5" type="Label" parent="GridContainer/ReaxPanel5/HBoxContainer/Panel5/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 30
+text = "Lvl. 1"
+horizontal_alignment = 2
+vertical_alignment = 2
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="GridContainer/ReaxPanel5/HBoxContainer/Panel5"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="ChargeBar5" type="ProgressBar" parent="GridContainer/ReaxPanel5/HBoxContainer/Panel5/HBoxContainer2"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 1
+show_percentage = false
+
+[node name="PanelContainer" type="PanelContainer" parent="GridContainer/ReaxPanel5/HBoxContainer/Panel5/HBoxContainer2"]
+layout_mode = 2
+
+[node name="PulseLabel5" type="Label" parent="GridContainer/ReaxPanel5/HBoxContainer/Panel5/HBoxContainer2/PanelContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(125, 0)
+layout_mode = 2
+size_flags_vertical = 1
+theme_override_font_sizes/font_size = 30
+text = "+0.00"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="HBoxContainer3" type="HBoxContainer" parent="GridContainer/ReaxPanel5/HBoxContainer/Panel5"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="OnButton5" type="Button" parent="GridContainer/ReaxPanel5/HBoxContainer/Panel5/HBoxContainer3"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(50, 0)
+layout_mode = 2
+mouse_filter = 2
+theme_override_font_sizes/font_size = 60
+text = " OFF "
+
+[node name="UpgradeBtn5" type="Button" parent="GridContainer/ReaxPanel5/HBoxContainer/Panel5/HBoxContainer3"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(75, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="ColorRect6" type="ColorRect" parent="GridContainer/ReaxPanel5"]
+z_index = -1
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+
+[node name="ReaxPanel6" type="Panel" parent="GridContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="HBoxContainer" type="HBoxContainer" parent="GridContainer/ReaxPanel6"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+
+[node name="LightPanel6" type="GridContainer" parent="GridContainer/ReaxPanel6/HBoxContainer"]
+custom_minimum_size = Vector2(125, 0)
+layout_mode = 2
+columns = 2
+
+[node name="LightEnabled6" type="ColorRect" parent="GridContainer/ReaxPanel6/HBoxContainer/LightPanel6"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(25, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="LightFired6" type="ColorRect" parent="GridContainer/ReaxPanel6/HBoxContainer/LightPanel6"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(25, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+color = Color(0, 0.698039, 1, 1)
+
+[node name="LightHeat6" type="ColorRect" parent="GridContainer/ReaxPanel6/HBoxContainer/LightPanel6"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+color = Color(1, 0.109804, 0.109804, 1)
+
+[node name="LightVent6" type="ColorRect" parent="GridContainer/ReaxPanel6/HBoxContainer/LightPanel6"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+color = Color(1, 0.541176, 0.109804, 1)
+
+[node name="LightFuel6" type="ColorRect" parent="GridContainer/ReaxPanel6/HBoxContainer/LightPanel6"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+color = Color(0.321569, 0.321569, 0.321569, 1)
+
+[node name="LightCool6" type="ColorRect" parent="GridContainer/ReaxPanel6/HBoxContainer/LightPanel6"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+color = Color(0.321569, 0.321569, 0.321569, 1)
+
+[node name="ColorRect61" type="ColorRect" parent="GridContainer/ReaxPanel6/HBoxContainer/LightPanel6"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+color = Color(0.321569, 0.321569, 0.321569, 1)
+
+[node name="ColorRect62" type="ColorRect" parent="GridContainer/ReaxPanel6/HBoxContainer/LightPanel6"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+color = Color(0.321569, 0.321569, 0.321569, 1)
+
+[node name="Panel6" type="VBoxContainer" parent="GridContainer/ReaxPanel6/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="HBoxContainer" type="HBoxContainer" parent="GridContainer/ReaxPanel6/HBoxContainer/Panel6"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="NameLabel" type="Label" parent="GridContainer/ReaxPanel6/HBoxContainer/Panel6/HBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 1
+theme_override_font_sizes/font_size = 30
+text = "Reaction Pillar 6"
+horizontal_alignment = 1
+vertical_alignment = 1
+uppercase = true
+
+[node name="Control" type="Control" parent="GridContainer/ReaxPanel6/HBoxContainer/Panel6/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="LevelLabel6" type="Label" parent="GridContainer/ReaxPanel6/HBoxContainer/Panel6/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 30
+text = "Lvl. 1"
+horizontal_alignment = 2
+vertical_alignment = 2
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="GridContainer/ReaxPanel6/HBoxContainer/Panel6"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="ChargeBar6" type="ProgressBar" parent="GridContainer/ReaxPanel6/HBoxContainer/Panel6/HBoxContainer2"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 1
+show_percentage = false
+
+[node name="PanelContainer" type="PanelContainer" parent="GridContainer/ReaxPanel6/HBoxContainer/Panel6/HBoxContainer2"]
+layout_mode = 2
+
+[node name="PulseLabel6" type="Label" parent="GridContainer/ReaxPanel6/HBoxContainer/Panel6/HBoxContainer2/PanelContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(125, 0)
+layout_mode = 2
+size_flags_vertical = 1
+theme_override_font_sizes/font_size = 30
+text = "+0.00"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="HBoxContainer3" type="HBoxContainer" parent="GridContainer/ReaxPanel6/HBoxContainer/Panel6"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="OnButton6" type="Button" parent="GridContainer/ReaxPanel6/HBoxContainer/Panel6/HBoxContainer3"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(50, 0)
+layout_mode = 2
+mouse_filter = 2
+theme_override_font_sizes/font_size = 60
+text = " OFF "
+
+[node name="UpgradeBtn6" type="Button" parent="GridContainer/ReaxPanel6/HBoxContainer/Panel6/HBoxContainer3"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(75, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="ColorRect6" type="ColorRect" parent="GridContainer/ReaxPanel6"]
+z_index = -1
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 size_flags_horizontal = 3

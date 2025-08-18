@@ -58,7 +58,7 @@ func _ready() -> void:
 	
 	_apply_venting_state()
 	_refresh_buttons_text_only()
-	_build_pillars()
+#	_build_pillars()
 	_sync_from_model()
 	
 func _process(_delta: float) -> void:
@@ -189,16 +189,16 @@ func _apply_venting_state() -> void:
 	if ignite_btn:
 		ignite_btn.disabled = GS.is_venting or (not GS.manual_ignite_enabled)
 
-func _build_pillars() -> void:
-	# clear grid
-	for c in pillar_grid.get_children():
-		c.queue_free()
-	_pillars.clear()
+#func _build_pillars() -> void:
+#	# clear grid
+#	for c in pillar_grid.get_children():
+#		c.queue_free()
+#	_pillars.clear()
 
 	# add pillars and hand each its index so it can talk to GameState
 	for i in range(PILLAR_COUNT):
 		var p: Node = PILLAR_SCENE.instantiate()
-		pillar_grid.add_child(p)
+		#pillar_grid.add_child(p)
 		_pillars.append(p)
 		if p.has_method("set_pillar_index"):
 			p.set_pillar_index(i)

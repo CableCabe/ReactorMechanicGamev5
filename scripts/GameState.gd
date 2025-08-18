@@ -49,6 +49,9 @@ const PILLAR_FUEL_PULSE      := 0.06     # Fuel burned per ignition
 const PILLAR_LEVEL_BONUS     := 0.20     # +20% Eu per level (same as before)
 const PILLAR_EU_BASE: float = 1.0         # Eu per shot at Lv1 (tweak)
 
+const PILLAR_TIER_EU_STEP: float = 0.30	# +30% Eu per tier step: tier 0=1.0x, tier 5=2.5x
+const PILLAR_TIER_HEAT_STEP: float = 0.25	# optional: +25% heat per tier step
+
 # FUEL
 var fuel_cap: float = 1000.0
 var _fuel: float = 0.0
@@ -530,9 +533,17 @@ func sim_tick(dt: float) -> void:
 			apply_mods(stats, pillar_mods(i))
 
 			var level_mult: float = 1.0 + float(p.get("level", 0)) * PILLAR_LEVEL_BONUS
-			var eu_gain: float = (PILLAR_PULSE_EU * level_mult * float(stats.get("eu_mult", 1.0))) + float(stats.get("eu_add", 0.0))
+
+			# Tier multiplier: i is the pillar index (0..5). Tier 0=1.0x, Tier 1=1.3x, ... Tier 5=2.5x
+			var tier_mult: float = 1.0 + PILLAR_TIER_EU_STEP * float(i)
+
+			# Eu per ignition (with tier and level), then apply live mods
+			var eu_gain: float = (PILLAR_PULSE_EU * tier_mult * level_mult * float(stats.get("eu_mult", 1.0))) + float(stats.get("eu_add", 0.0))
 			produced_eu += eu_gain
-			heat_pulse += (PILLAR_PULSE_HEAT + float(stats.get("heat_add", 0.0))) * float(stats.get("heat_mult", 1.0))
+
+			# Heat per ignition (optional tier scaling to match power)
+			var heat_base: float = PILLAR_PULSE_HEAT * (1.0 + PILLAR_TIER_HEAT_STEP * float(i))
+			heat_pulse += (heat_base + float(stats.get("heat_add", 0.0))) * float(stats.get("heat_mult", 1.0))
 
 		if fired:
 			emit_signal("pillar_fired", i)
